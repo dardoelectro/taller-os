@@ -1,5 +1,5 @@
-// ============================================================
-//  SERVIDOR PRINCIPAL — TallerOS
+﻿// ============================================================
+//  SERVIDOR PRINCIPAL â€” TallerOS
 //  Archivo: server/index.js
 //  Uso: node server/index.js
 // ============================================================
@@ -20,26 +20,26 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/talleros';
 
-// ─── Middlewares ──────────────────────────────────────────
+// â”€â”€â”€ Middlewares â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// ─── Conectar a MongoDB ───────────────────────────────────
+// â”€â”€â”€ Conectar a MongoDB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 mongoose.connect(MONGO_URI)
   .then(() => {
-    console.log('✅ Conectado a MongoDB:', MONGO_URI);
-    console.log('🔧 TallerOS corriendo en http://localhost:' + PORT);
+    console.log('âœ… Conectado a MongoDB:', MONGO_URI);
+    console.log('ðŸ”§ TallerOS corriendo en http://localhost:' + PORT);
   })
   .catch(err => {
-    console.error('❌ Error al conectar MongoDB:', err.message);
-    console.error('   Asegurate de que MongoDB esté corriendo (mongod)');
+    console.error('âŒ Error al conectar MongoDB:', err.message);
+    console.error('   Asegurate de que MongoDB estÃ© corriendo (mongod)');
     process.exit(1);
   });
 
-// ════════════════════════════════════════════════════════════
-//  RUTAS: AUTENTICACIÓN
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: AUTENTICACIÃ“N
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 // Login
 app.post('/api/auth/login', async (req, res) => {
@@ -47,12 +47,12 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña requeridos' });
+      return res.status(400).json({ error: 'Email y contraseÃ±a requeridos' });
     }
 
     const usuario = await Usuario.findOne({ email });
     if (!usuario) {
-      return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+      return res.status(401).json({ error: 'Email o contraseÃ±a incorrectos' });
     }
 
     if (!usuario.activo) {
@@ -61,7 +61,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     const passwordValida = await bcrypt.compare(password, usuario.password);
     if (!passwordValida) {
-      return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+      return res.status(401).json({ error: 'Email o contraseÃ±a incorrectos' });
     }
 
     const token = jwt.sign(
@@ -132,11 +132,11 @@ app.get('/api/auth/usuarios', verifyAdmin, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
-//  RUTAS: VEHÍCULOS
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: VEHÃCULOS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// Buscar por patente (búsqueda parcial)
+// Buscar por patente (bÃºsqueda parcial)
 app.get('/api/vehiculos/buscar/:patente', verifyToken, async (req, res) => {
   try {
     const regex = new RegExp(req.params.patente, 'i');
@@ -149,19 +149,19 @@ app.get('/api/vehiculos/buscar/:patente', verifyToken, async (req, res) => {
   }
 });
 
-// Obtener vehículo por patente exacta (para el QR)
+// Obtener vehÃ­culo por patente exacta (para el QR)
 app.get('/api/vehiculos/:dominio', verifyToken, async (req, res) => {
   try {
     const v = await Vehiculo.findOne({ dominio: req.params.dominio.toUpperCase() })
       .populate('titular_id');
-    if (!v) return res.status(404).json({ error: 'Vehículo no encontrado' });
+    if (!v) return res.status(404).json({ error: 'VehÃ­culo no encontrado' });
     res.json(v);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-// Crear o actualizar vehículo
+// Crear o actualizar vehÃ­culo
 app.post('/api/vehiculos', verifyToken, async (req, res) => {
   try {
     const dominio = req.body.dominio?.toUpperCase();
@@ -170,7 +170,7 @@ app.post('/api/vehiculos', verifyToken, async (req, res) => {
     let vehiculo = await Vehiculo.findOne({ dominio });
 
     if (!vehiculo) {
-      // Es nuevo — generar QR
+      // Es nuevo â€” generar QR
       const urlQR = `http://localhost:${PORT}/historial-publico/${dominio}`;
       const qrSVG = await QRCode.toString(urlQR, { type: 'svg', width: 200 });
 
@@ -189,9 +189,9 @@ app.post('/api/vehiculos', verifyToken, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  RUTAS: CLIENTES
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 app.get('/api/clientes/buscar/:nombre', verifyToken, async (req, res) => {
   try {
@@ -215,11 +215,11 @@ app.post('/api/clientes', verifyToken, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  RUTAS: FICHAS
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// Guardar ficha completa (recepción)
+// Guardar ficha completa (recepciÃ³n)
 app.post('/api/fichas', verifyToken, async (req, res) => {
   try {
     const { ficha_data, servicios_data, estado_items } = req.body;
@@ -238,7 +238,7 @@ app.post('/api/fichas', verifyToken, async (req, res) => {
       );
     }
 
-    // 2. Buscar o crear vehículo
+    // 2. Buscar o crear vehÃ­culo
     const dominio = ficha_data.dominio?.toUpperCase();
     let vehiculo = await Vehiculo.findOne({ dominio });
     if (!vehiculo) {
@@ -259,7 +259,7 @@ app.post('/api/fichas', verifyToken, async (req, res) => {
         qr_codigo:     qrSVG,
       });
     } else {
-      // Actualizar titular si cambió
+      // Actualizar titular si cambiÃ³
       if (cliente && String(vehiculo.titular_id) !== String(cliente._id)) {
         if (vehiculo.titular_id) vehiculo.titulares_prev.push(vehiculo.titular_id);
         vehiculo.titular_id = cliente._id;
@@ -288,7 +288,7 @@ app.post('/api/fichas', verifyToken, async (req, res) => {
         rueda_auxilio: ficha_data.accesorios?.includes('Rueda auxilio'),
         crique:        ficha_data.accesorios?.includes('Crique'),
         herramientas:  ficha_data.accesorios?.includes('Herramientas'),
-        botiquin:      ficha_data.accesorios?.includes('Botiquín'),
+        botiquin:      ficha_data.accesorios?.includes('BotiquÃ­n'),
         otros:         ficha_data.otros_accesorios,
       },
       estado_general:  ficha_data.estado_general,
@@ -309,12 +309,12 @@ app.post('/api/fichas', verifyToken, async (req, res) => {
       await Servicio.insertMany(servicios);
     }
 
-    // 5. Guardar estado de ítems
+    // 5. Guardar estado de Ã­tems
     if (estado_items?.length) {
       await EstadoItem.create({ ficha_id: ficha._id, dominio, items: estado_items });
     }
 
-    // 6. Actualizar próximo service si se indicó
+    // 6. Actualizar prÃ³ximo service si se indicÃ³
     if (ficha_data.meses_intervalo || ficha_data.km_intervalo) {
       const hoy = new Date(ficha_data.fecha_ingreso || new Date());
       let fecha_proximo = null;
@@ -363,7 +363,7 @@ app.get('/api/historial/:dominio', verifyToken, async (req, res) => {
     const dominio = req.params.dominio.toUpperCase();
 
     const vehiculo = await Vehiculo.findOne({ dominio }).populate('titular_id');
-    if (!vehiculo) return res.status(404).json({ error: 'Vehículo no encontrado' });
+    if (!vehiculo) return res.status(404).json({ error: 'VehÃ­culo no encontrado' });
 
     const fichas = await Ficha.find({ dominio }).sort({ fecha_ingreso: -1 });
 
@@ -379,18 +379,18 @@ app.get('/api/historial/:dominio', verifyToken, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
-//  RUTA: QR — Historial Público del Vehículo
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTA: QR â€” Historial PÃºblico del VehÃ­culo
 //  (esta es la URL que se imprime en el QR)
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 app.get('/historial-publico/:dominio', async (req, res) => {
   try {
     const dominio = req.params.dominio.toUpperCase();
     const vehiculo = await Vehiculo.findOne({ dominio }).populate('titular_id');
     if (!vehiculo) {
       return res.send(`<html><body style="font-family:sans-serif;padding:40px;text-align:center;">
-        <h2>🔍 Vehículo ${dominio} no encontrado</h2>
-        <p>Este vehículo no tiene historial registrado en TallerOS.</p>
+        <h2>ðŸ” VehÃ­culo ${dominio} no encontrado</h2>
+        <p>Este vehÃ­culo no tiene historial registrado en TallerOS.</p>
       </body></html>`);
     }
     const fichas = await Ficha.find({ dominio }).sort({ fecha_ingreso: 1 });
@@ -399,7 +399,7 @@ app.get('/historial-publico/:dominio', async (req, res) => {
       const tags = servicios.map(s => `<span style="background:#ff6b1a22;color:#ff6b1a;padding:3px 10px;border-radius:20px;font-size:12px;margin:2px;">${s.descripcion}</span>`).join('');
       return `
         <div style="border:1px solid #eee;border-radius:10px;padding:16px;margin-bottom:12px;">
-          <div style="font-size:12px;color:#888;">${new Date(f.fecha_ingreso).toLocaleDateString('es-AR')} · ${f.turno || ''}</div>
+          <div style="font-size:12px;color:#888;">${new Date(f.fecha_ingreso).toLocaleDateString('es-AR')} Â· ${f.turno || ''}</div>
           <div style="font-weight:600;font-size:15px;margin:4px 0;">${f.km_inicial ? parseInt(f.km_inicial).toLocaleString() + ' km' : ''}</div>
           <div>${tags}</div>
           ${f.obs_adicionales ? `<div style="font-size:12px;color:#666;margin-top:8px;">${f.obs_adicionales}</div>` : ''}
@@ -408,28 +408,28 @@ app.get('/historial-publico/:dominio', async (req, res) => {
 
     res.send(`<!DOCTYPE html><html><head>
       <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>Historial — ${dominio}</title>
+      <title>Historial â€” ${dominio}</title>
       <style>body{font-family:'Segoe UI',sans-serif;max-width:500px;margin:0 auto;padding:20px;background:#f9f9f9;}
       .header{background:#0f0f0f;color:white;padding:20px;border-radius:12px;margin-bottom:20px;text-align:center;}
       .patente{font-size:32px;font-weight:900;letter-spacing:4px;color:#ff6b1a;}</style>
     </head><body>
       <div class="header">
-        <div style="font-size:12px;letter-spacing:2px;color:#aaa;margin-bottom:4px;">🔧 TALLEROS</div>
+        <div style="font-size:12px;letter-spacing:2px;color:#aaa;margin-bottom:4px;">ðŸ”§ TALLEROS</div>
         <div class="patente">${dominio}</div>
         <div style="font-size:14px;color:#ccc;margin-top:4px;">${vehiculo.marca || ''} ${vehiculo.modelo || ''} ${vehiculo.anio || ''}</div>
-        <div style="font-size:12px;color:#888;margin-top:2px;">Titular: ${vehiculo.titular_id?.nombre || '—'}</div>
+        <div style="font-size:12px;color:#888;margin-top:2px;">Titular: ${vehiculo.titular_id?.nombre || 'â€”'}</div>
       </div>
       <h3 style="font-size:14px;color:#666;text-transform:uppercase;letter-spacing:1px;">Historial de servicios (${fichas.length})</h3>
-      ${historialHTML.join('') || '<p style="color:#aaa;">Sin servicios registrados aún.</p>'}
+      ${historialHTML.join('') || '<p style="color:#aaa;">Sin servicios registrados aÃºn.</p>'}
     </body></html>`);
   } catch (e) {
     res.status(500).send('<p>Error al cargar el historial.</p>');
   }
 });
 
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  RUTAS: DASHBOARD
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 app.get('/api/dashboard', verifyToken, async (req, res) => {
   try {
     const inicio_mes = new Date(); inicio_mes.setDate(1); inicio_mes.setHours(0,0,0,0);
@@ -451,9 +451,9 @@ app.get('/api/dashboard', verifyToken, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
-//  RUTAS: PRÓXIMO SERVICE / ALERTAS
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: PRÃ“XIMO SERVICE / ALERTAS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 // Recalcular y devolver todas las alertas activas
 app.get('/api/alertas', verifyToken, async (req, res) => {
@@ -493,7 +493,7 @@ app.get('/api/alertas', verifyToken, async (req, res) => {
   }
 });
 
-// Obtener próximo service de un vehículo
+// Obtener prÃ³ximo service de un vehÃ­culo
 app.get('/api/alertas/:dominio', verifyToken, async (req, res) => {
   try {
     const ps = await ProximoService.findOne({ dominio: req.params.dominio.toUpperCase() });
@@ -503,7 +503,7 @@ app.get('/api/alertas/:dominio', verifyToken, async (req, res) => {
   }
 });
 
-// Actualizar manualmente el próximo service
+// Actualizar manualmente el prÃ³ximo service
 app.put('/api/alertas/:dominio', verifyToken, async (req, res) => {
   try {
     const dominio = req.params.dominio.toUpperCase();
@@ -530,11 +530,11 @@ app.put('/api/alertas/:dominio', verifyToken, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  RUTAS: TURNOS
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// Obtener turnos de un día específico
+// Obtener turnos de un dÃ­a especÃ­fico
 app.get('/api/turnos/dia/:fecha', verifyToken, async (req, res) => {
   try {
     const inicio = new Date(req.params.fecha);
@@ -572,7 +572,7 @@ app.get('/api/turnos/semana/:fechaInicio', verifyToken, async (req, res) => {
 // Crear turno
 app.post('/api/turnos', verifyToken, async (req, res) => {
   try {
-    // Si la patente existe en BD, vincular vehículo y cliente
+    // Si la patente existe en BD, vincular vehÃ­culo y cliente
     let vehiculo_id = null, cliente_id = null;
     if (req.body.dominio) {
       const v = await Vehiculo.findOne({ dominio: req.body.dominio.toUpperCase() }).populate('titular_id');
@@ -611,9 +611,9 @@ app.delete('/api/turnos/:id', verifyToken, async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════
-//  RUTAS: EDICIÓN DE FICHAS
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: EDICIÃ“N DE FICHAS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 // Obtener ficha completa por ID
 app.get('/api/fichas/:id', verifyToken, async (req, res) => {
@@ -647,7 +647,7 @@ app.put('/api/fichas/:id', verifyToken, async (req, res) => {
       responsable: ficha_data.responsable,
       turno: ficha_data.turno,
       fluidos: { aceite: ficha_data.medida_aceite, frenos: ficha_data.medida_frenos, refrigerante: ficha_data.medida_refrigerante },
-      accesorios: { baliza: ficha_data.accesorios?.includes('Baliza emergencia') || false, extintor: ficha_data.accesorios?.includes('Extintor') || false, rueda_auxilio: ficha_data.accesorios?.includes('Rueda auxilio') || false, crique: ficha_data.accesorios?.includes('Crique') || false, herramientas: ficha_data.accesorios?.includes('Herramientas') || false, botiquin: ficha_data.accesorios?.includes('Botiquín') || false, otros: ficha_data.otros_accesorios },
+      accesorios: { baliza: ficha_data.accesorios?.includes('Baliza emergencia') || false, extintor: ficha_data.accesorios?.includes('Extintor') || false, rueda_auxilio: ficha_data.accesorios?.includes('Rueda auxilio') || false, crique: ficha_data.accesorios?.includes('Crique') || false, herramientas: ficha_data.accesorios?.includes('Herramientas') || false, botiquin: ficha_data.accesorios?.includes('BotiquÃ­n') || false, otros: ficha_data.otros_accesorios },
       estado_general: ficha_data.estado_general,
       obs_visuales: ficha_data.obs_visuales,
       obs_adicionales: ficha_data.obs_adicionales,
@@ -683,7 +683,7 @@ app.delete('/api/servicios/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Actualizar estado de ítems
+// Actualizar estado de Ã­tems
 app.put('/api/estadoitems/:id', verifyToken, async (req, res) => {
   try {
     const estadoItem = await EstadoItem.findByIdAndUpdate(req.params.id, { items: req.body.items }, { new: true });
@@ -693,9 +693,121 @@ app.put('/api/estadoitems/:id', verifyToken, async (req, res) => {
   }
 });
 
-// ─── Iniciar servidor ─────────────────────────────────────
+// â”€â”€â”€ Iniciar servidor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: OPERARIOS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+app.get('/api/operarios', verifyToken, async (req, res) => {
+  try {
+    const operarios = await Operario.find();
+    res.json(operarios);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/operarios', verifyToken, async (req, res) => {
+  try {
+    const operario = await Operario.create(req.body);
+    res.json(operario);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put('/api/operarios/:id', verifyToken, async (req, res) => {
+  try {
+    const operario = await Operario.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(operario);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/operarios/:id', verifyToken, async (req, res) => {
+  try {
+    await Operario.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: TALLER
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+app.get('/api/taller', verifyToken, async (req, res) => {
+  try {
+    let taller = await Taller.findOne();
+    if (!taller) {
+      taller = await Taller.create({ nombre: 'MODUCHIP AutoElectroLab' });
+    }
+    res.json(taller);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put('/api/taller', verifyToken, async (req, res) => {
+  try {
+    let taller = await Taller.findOne();
+    if (!taller) {
+      taller = await Taller.create(req.body);
+    } else {
+      taller = await Taller.findByIdAndUpdate(taller._id, req.body, { new: true });
+    }
+    res.json(taller);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  RUTAS: SERVICIOS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+app.get('/api/servicios', verifyToken, async (req, res) => {
+  try {
+    const servicios = await Servicio.find();
+    res.json(servicios);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/servicios', verifyToken, async (req, res) => {
+  try {
+    const servicio = await Servicio.create(req.body);
+    res.json(servicio);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put('/api/servicios/:id', verifyToken, async (req, res) => {
+  try {
+    const servicio = await Servicio.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(servicio);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/servicios/:id', verifyToken, async (req, res) => {
+  try {
+    await Servicio.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 app.listen(PORT, () => {
-  console.log(`\n🔧 TallerOS iniciado`);
-  console.log(`   Aplicación: http://localhost:${PORT}`);
+  console.log(`\nðŸ”§ TallerOS iniciado`);
+  console.log(`   AplicaciÃ³n: http://localhost:${PORT}`);
   console.log(`   Base de datos: ${MONGO_URI}\n`);
 });
