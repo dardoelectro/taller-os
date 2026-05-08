@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TallerOS — Sistema de Recepción</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+    --border: #2e2e2e; --accent: #ff6b1a; --text: #f0f0f0;
+    --muted: #777; --good: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  header {
+    background: var(--surface); border-bottom: 2px solid var(--accent);
+    padding: 0 32px; display: flex; align-items: center;
+    justify-content: space-between; height: 64px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo-text { font-family: 'Bebas Neue'; font-size: 26px; letter-spacing: 2px; color: var(--accent); }
+  .logo-sub  { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); display: inline-block; margin-right: 6px; }
+  .conn-dot.online { background: var(--good); }
+  #conn-label { font-size: 12px; color: var(--muted); }
+
+  nav button {
+    background: none; border: none; color: var(--muted);
+    font-family: 'DM Sans'; font-size: 13px; font-weight: 500;
+    padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: all .2s;
+  }
+  nav button:hover { color: var(--text); background: var(--surface2); }
+  nav button.active { color: var(--accent); background: rgba(255,107,26,0.1); }
+
+  .main { padding: 28px; max-width: 1100px; margin: 0 auto; }
+  .view { display: none; } .view.active { display: block; }
+
+  .page-title { font-family: 'Bebas Neue'; font-size: 40px; letter-spacing: 3px; margin-bottom: 2px; }
+  .page-title span { color: var(--accent); }
+  .page-sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+  .card-title { font-family: 'Bebas Neue'; font-size: 17px; letter-spacing: 2px; color: var(--accent); margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .g2 { grid-column: span 2; } .g3 { grid-column: span 3; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .field input, .field select, .field textarea {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: 'DM Sans'; font-size: 14px;
+    padding: 9px 13px; transition: border-color .2s; outline: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 72px; }
+  .field select option { background: var(--surface2); }
+  .field input::placeholder { color: #444; }
+
+  .checklist { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+  .check-item {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 11px; cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .check-item:hover { border-color: var(--accent); }
+  .check-item.checked { border-color: var(--accent); background: rgba(255,107,26,0.07); }
+  .check-box { width: 17px; height: 17px; border-radius: 4px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .check-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
+  .check-box::after { content: '✓'; color: white; font-size: 10px; display: none; }
+  .check-item.checked .check-box::after { display: block; }
+  .check-label { font-size: 13px; font-weight: 500; }
+
+  .estado-group { display: flex; gap: 7px; }
+  .estado-btn { flex: 1; padding: 8px; border-radius: 7px; border: 2px solid var(--border); background: none; color: var(--muted); font-family: 'DM Sans'; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; text-align: center; }
+  .estado-btn.bueno.sel  { border-color: var(--good); color: var(--good); background: rgba(34,197,94,0.1); }
+  .estado-btn.regular.sel{ border-color: var(--warn); color: var(--warn); background: rgba(245,158,11,0.1); }
+  .estado-btn.malo.sel   { border-color: var(--bad);  color: var(--bad);  background: rgba(239,68,68,0.1); }
+
+  .estado-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  .estado-item-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 6px; }
+  .estado-mini { display: flex; gap: 4px; }
+  .estado-mini button { flex: 1; padding: 5px 3px; border-radius: 5px; border: 1px solid var(--border); background: none; font-size: 10px; font-weight: 700; cursor: pointer; transition: all .15s; color: var(--muted); font-family: 'DM Mono'; }
+  .estado-mini button.b.sel { background: rgba(34,197,94,.15); border-color: var(--good); color: var(--good); }
+  .estado-mini button.r.sel { background: rgba(245,158,11,.15); border-color: var(--warn); color: var(--warn); }
+  .estado-mini button.m.sel { background: rgba(239,68,68,.15); border-color: var(--bad);  color: var(--bad);  }
+
+  .btn { padding: 11px 22px; border-radius: 8px; border: none; font-family: 'DM Sans'; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-primary  { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #ff8040; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,107,26,.3); }
+  .btn-secondary{ background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost    { background: none; color: var(--muted); border: 1px solid var(--border); }
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+
+  /* Historial */
+  .search-bar { position: relative; margin-bottom: 20px; }
+  .search-bar input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Mono'; font-size: 16px; padding: 13px 18px 13px 46px; outline: none; transition: border-color .2s; letter-spacing: 2px; text-transform: uppercase; }
+  .search-bar input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; }
+
+  .vehiculo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 10px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 14px; }
+  .vehiculo-card:hover { border-color: var(--accent); transform: translateX(3px); }
+  .vehiculo-patente { font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 3px; color: var(--accent); background: rgba(255,107,26,.1); padding: 5px 12px; border-radius: 6px; flex-shrink: 0; }
+  .vehiculo-info { flex: 1; }
+  .vehiculo-marca { font-weight: 600; font-size: 15px; }
+  .vehiculo-titular { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .vehiculo-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: rgba(255,107,26,.1); color: var(--accent); }
+
+  .timeline { position: relative; padding-left: 26px; }
+  .timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 18px; }
+  .tl-dot { position: absolute; left: -23px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .tl-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .tl-date { font-size: 11px; color: var(--muted); font-family: 'DM Mono'; margin-bottom: 5px; }
+  .tl-km { font-size: 12px; color: var(--accent); font-family: 'DM Mono'; }
+  .tl-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tl-tag { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: rgba(255,107,26,.08); color: var(--accent); border: 1px solid rgba(255,107,26,.2); }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; text-align: center; }
+  .stat-num { font-family: 'Bebas Neue'; font-size: 40px; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* QR panel */
+  .qr-box { background: white; border-radius: 12px; padding: 16px; display: inline-block; text-align: center; }
+  .qr-box svg { display: block; }
+  .qr-caption { font-size: 11px; color: #333; margin-top: 8px; font-family: 'DM Mono'; letter-spacing: 1px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 500; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; max-width: 640px; width: 100%; }
+  .modal h2 { font-family: 'Bebas Neue'; font-size: 26px; letter-spacing: 2px; color: var(--accent); margin-bottom: 18px; }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--good); color: white; padding: 13px 22px; border-radius: 10px; font-weight: 600; font-size: 13px; opacity: 0; transform: translateY(18px); transition: all .3s; z-index: 9999; pointer-events: none; }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.err { background: var(--bad); }
+
+  /* Spinner */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Turnos semana */
+  .dia-header { padding:10px 8px; text-align:center; font-size:12px; font-weight:600; color:var(--muted); border-right:1px solid var(--border); text-transform:uppercase; letter-spacing:.5px; }
+  .dia-header.hoy { color:var(--accent); background:rgba(255,107,26,.06); }
+  .dia-col { border-right:1px solid var(--border); padding:8px; min-height:140px; cursor:pointer; transition:background .15s; }
+  .dia-col:hover { background:rgba(255,107,26,.04); }
+  .dia-col.hoy { background:rgba(255,107,26,.05); }
+  .turno-chip { background:var(--accent); color:white; border-radius:6px; padding:4px 7px; font-size:11px; font-weight:600; margin-bottom:4px; cursor:pointer; transition:opacity .15s; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .turno-chip:hover { opacity:.8; }
+  .turno-chip.confirmado { background:#2563eb; }
+  .turno-chip.atendido   { background:var(--good); }
+  .turno-chip.cancelado  { background:var(--muted); text-decoration:line-through; }
+
+  /* Turno del día lista */
+  .turno-row { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:10px; display:flex; align-items:center; gap:14px; }
+  .turno-hora { font-family:'Bebas Neue'; font-size:22px; color:var(--accent); flex-shrink:0; width:60px; }
+  .turno-info { flex:1; }
+  .turno-titulo { font-weight:600; font-size:14px; }
+  .turno-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .turno-estado { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; flex-shrink:0; }
+  .estado-pendiente  { background:rgba(245,158,11,.15); color:var(--warn); }
+  .estado-confirmado { background:rgba(37,99,235,.15);  color:#2563eb; }
+  .estado-atendido   { background:rgba(34,197,94,.15);  color:var(--good); }
+  .estado-cancelado  { background:rgba(107,114,128,.15);color:var(--muted); }
+
+  /* Alertas */
+  .alerta-card { border-radius:12px; padding:18px; margin-bottom:10px; display:flex; align-items:center; gap:14px; border:1px solid; cursor:pointer; transition:all .2s; }
+  .alerta-card:hover { transform:translateX(3px); }
+  .alerta-card.vencido    { background:rgba(239,68,68,.06);  border-color:rgba(239,68,68,.3); }
+  .alerta-card.proximo_30 { background:rgba(245,158,11,.06); border-color:rgba(245,158,11,.3); }
+  .alerta-card.proximo_60 { background:rgba(255,107,26,.05); border-color:rgba(255,107,26,.2); }
+  .alerta-badge { font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; flex-shrink:0; }
+  .alerta-card.vencido    .alerta-badge { background:var(--bad);  color:white; }
+  .alerta-card.proximo_30 .alerta-badge { background:var(--warn); color:white; }
+  .alerta-card.proximo_60 .alerta-badge { background:var(--accent);color:white; }
+  .active-filtro { border-color:var(--accent) !important; color:var(--accent) !important; }
+
+  /* Help styles */
+  .help-section { display: flex; flex-direction: column; gap: 14px; }
+  .help-section > p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 4px; }
+  .help-step { display: flex; gap: 14px; align-items: flex-start; }
+  .help-num { background: var(--accent); color: white; font-family: 'Bebas Neue'; font-size: 14px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; letter-spacing: 0; }
+  .help-step > div { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .help-step strong { color: var(--accent); }
+
+  @media (max-width:700px) {
+    .grid-2,.grid-3 { grid-template-columns: 1fr; }
+    .g2,.g3 { grid-column: span 1; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .main { padding: 14px; }
+    header { padding: 0 14px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <!-- Logo del taller: si existe img/logo.png se muestra, sino muestra icono texto -->
+    <img id="taller-logo" src="img/logo.png" alt="Logo"
+         style="height:44px;width:auto;border-radius:8px;object-fit:contain;display:none;"
+         onload="this.style.display='block';document.getElementById('logo-fallback').style.display='none';"
+         onerror="this.style.display='none';">
+    <div id="logo-fallback">
+      <div class="logo-text">&#128295; TallerOS</div>
+      <div class="logo-sub">Sistema de Recepcion</div>
+    </div>
+  </div>
+  <nav>
+    <button class="active" onclick="showView('nueva')">Nueva Ficha</button>
+    <button onclick="showView('turnos')">Turnos</button>
+    <button onclick="showView('alertas')">⚠ Alertas <span id="badge-alertas" style="display:none;background:var(--bad);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showView('historial')">Historial</button>
+    <button onclick="showView('dashboard')">Dashboard</button>
+    <button onclick="showView('ayuda')">Ayuda</button>
+    <button onclick="showView('acerca')">Acerca de</button>
+  </nav>
+  <div style="display:flex;align-items:center;">
+    <span class="conn-dot" id="conn-dot"></span>
+    <span id="conn-label">Conectando...</span>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- ===== NUEVA FICHA ===== -->
+<div class="view active" id="view-nueva">
+  <div class="page-title">Recepción de <span>Vehículo</span></div>
+  <div class="page-sub">Completá la ficha — se guarda automáticamente en la base de datos</div>
+
+  <div class="card">
+    <div class="card-title">🚗 Datos del Vehículo</div>
+    <div class="grid-3">
+      <div class="field"><label>Tipo</label>
+        <select id="tipo_vehiculo"><option value="">—</option><option>Auto</option><option>Camioneta</option><option>Moto</option><option>Camión</option><option>Utilitario</option><option>SUV</option></select></div>
+      <div class="field"><label>Año</label><input type="number" id="anio" placeholder="2020" min="1970" max="2030"></div>
+      <div class="field"><label>Tipo de Caja</label>
+        <select id="tipo_caja"><option value="">—</option><option>Manual</option><option>Automática</option><option>CVT</option><option>Doble Embrague</option></select></div>
+      <div class="field g2"><label>Marca y Modelo</label><input type="text" id="marca_modelo" placeholder="Ej: Toyota Corolla"></div>
+      <div class="field"><label>Combustible</label>
+        <select id="combustible"><option value="">—</option><option>Nafta</option><option>Diesel</option><option>GNC + Nafta</option><option>Eléctrico</option><option>Híbrido</option></select></div>
+      <div class="field"><label>Dominio (Patente) *</label><input type="text" id="dominio" placeholder="AB123CD" style="text-transform:uppercase;font-family:'DM Mono';font-size:16px;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="field"><label>Nº Chasis</label><input type="text" id="chasis" style="font-family:'DM Mono';font-size:12px;"></div>
+      <div class="field"><label>Nº Motor</label><input type="text" id="motor" style="font-family:'DM Mono';font-size:12px;"></div>
+      <div class="field"><label>VTV (vencimiento)</label><input type="text" id="vtv" placeholder="mm/aaaa"></div>
+      <div class="field"><label>ECU</label><input type="text" id="ecu"></div>
+      <div class="field"><label>KM Inicial</label><input type="number" id="km_inicial" placeholder="0"></div>
+      <div class="field"><label>KM Final</label><input type="number" id="km_final" placeholder="0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 Datos del Cliente</div>
+    <div class="grid-2">
+      <div class="field"><label>Titular del Vehículo</label><input type="text" id="titular" placeholder="Nombre y apellido"></div>
+      <div class="field"><label>Responsable (si difiere)</label><input type="text" id="responsable" placeholder="Quién trae el auto"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="telefono" placeholder="11-1234-5678"></div>
+      <div class="field"><label>Email</label><input type="email" id="email" placeholder="correo@ejemplo.com"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔩 Trabajos Solicitados</div>
+    <div class="grid-2">
+      <div class="field g2"><label>Cambio de Aceite y Filtro</label><input type="text" id="aceite" placeholder="Tipo/grado si corresponde"></div>
+      <div class="field g2"><label>Cambio de Bujías</label><input type="text" id="bujias" placeholder="Detallar si aplica"></div>
+      <div class="field g2"><label>Arreglos Mecánicos</label><textarea id="arreglos_mecanicos" placeholder="Describir trabajos mecánicos..."></textarea></div>
+      <div class="field g2"><label>Arreglos Eléctricos</label><textarea id="arreglos_electricos" placeholder="Describir trabajos eléctricos..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💧 Fluidos al Ingreso</div>
+    <div class="grid-3">
+      <div class="field"><label>Aceite</label>
+        <select id="medida_aceite"><option value="">—</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Mínimo</option></select></div>
+      <div class="field"><label>Líquido de Frenos</label>
+        <select id="medida_frenos"><option value="">—</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Mínimo</option></select></div>
+      <div class="field"><label>Refrigerante</label>
+        <select id="medida_refrigerante"><option value="">—</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Mínimo</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎒 Accesorios del Vehículo</div>
+    <div class="checklist">
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Baliza emergencia</span></label>
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Extintor</span></label>
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Rueda auxilio</span></label>
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Crique</span></label>
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Herramientas</span></label>
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Botiquín</span></label>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Otros accesorios</label><input type="text" id="otros_accesorios" placeholder="GPS, cargador, documentación..."></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 Estado del Vehículo al Ingreso</div>
+    <div class="grid-3" id="estado-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👁️ Observaciones Visuales</div>
+    <div class="field" style="margin-bottom:14px;"><label>Estado General</label>
+      <div class="estado-group" id="estado-general">
+        <button class="estado-btn bueno" onclick="selEstado(this,'estado-general')">✅ Bueno</button>
+        <button class="estado-btn regular" onclick="selEstado(this,'estado-general')">⚠️ Regular</button>
+        <button class="estado-btn malo" onclick="selEstado(this,'estado-general')">❌ Malo</button>
+      </div>
+    </div>
+    <div class="field"><label>Detalles / Golpes / Marcas</label><textarea id="obs_visuales" placeholder="Rayones, abolladuras, daños visibles..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔧 Próximo Service</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Completá solo si en esta visita se realizó un service. El sistema generará la alerta automáticamente.</p>
+    <div class="grid-3">
+      <div class="field">
+        <label>Intervalo en meses</label>
+        <select id="meses_intervalo">
+          <option value="">— No aplica —</option>
+          <option value="3">Cada 3 meses</option>
+          <option value="6">Cada 6 meses</option>
+          <option value="9">Cada 9 meses</option>
+          <option value="12">Cada 12 meses</option>
+          <option value="18">Cada 18 meses</option>
+          <option value="24">Cada 24 meses</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Intervalo en KM (opcional)</label>
+        <input type="number" id="km_intervalo" placeholder="Ej: 10000">
+      </div>
+      <div class="field">
+        <label>Nota para el mecánico</label>
+        <input type="text" id="nota_service" placeholder="Ej: usar aceite 5W40">
+      </div>
+    </div>
+    <div id="preview-proximo-service" style="margin-top:12px;display:none;">
+      <div style="background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.3);border-radius:8px;padding:12px;font-size:13px;color:var(--accent);">
+        📅 Próximo service estimado: <strong id="texto-proximo-service"></strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✍️ Confirmación</div>
+    <div class="grid-2">
+      <div class="field"><label>Turno / Mecánico responsable</label><input type="text" id="turno" placeholder="Ej: Turno mañana — Juan"></div>
+      <div class="field"><label>Fecha de Ingreso</label><input type="date" id="fecha_ingreso"></div>
+      <div class="field g2"><label>Observaciones adicionales</label><textarea id="obs_adicionales" placeholder="Cualquier dato relevante..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="limpiarForm()">🗑 Limpiar</button>
+    <button class="btn btn-secondary" onclick="generarPDF()">📄 PDF Ficha</button>
+    <button class="btn btn-primary" id="btn-guardar" onclick="guardarFicha()">💾 Guardar en BD</button>
+  </div>
+</div>
+
+<!-- ===== HISTORIAL ===== -->
+<div class="view" id="view-historial">
+  <div class="page-title">Historial de <span>Vehículos</span></div>
+  <div class="page-sub">Buscá por patente para ver el historial completo</div>
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-patente" placeholder="PATENTE..." oninput="buscarVehiculo(this.value)">
+  </div>
+  <div id="resultados-busqueda"></div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="view" id="view-dashboard">
+  <div class="page-title"><span>Dashboard</span></div>
+  <div class="page-sub">Estadísticas del taller</div>
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="stat-card"><div class="stat-num" id="s-fichas">—</div><div class="stat-label">Fichas Totales</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-vehiculos">—</div><div class="stat-label">Vehículos Únicos</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-mes">—</div><div class="stat-label">Este Mes</div></div>
+    <div class="stat-card" id="stat-alertas-card" style="cursor:pointer;" onclick="showView('alertas')">
+      <div class="stat-num" id="s-alertas" style="color:var(--warn);">—</div>
+      <div class="stat-label">Alertas Service</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div class="card">
+      <div class="card-title">📅 Turnos de Hoy</div>
+      <div id="dash-turnos-hoy"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Últimos Ingresos</div>
+      <div id="ultimas-fichas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TURNOS ===== -->
+<div class="view" id="view-turnos">
+  <div class="page-title">Agenda de <span>Turnos</span></div>
+  <div class="page-sub">Turnos del día y vista semanal</div>
+
+  <!-- Selector de fecha y botón nuevo turno -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+    <input type="date" id="turnos-fecha" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans';font-size:14px;padding:10px 14px;outline:none;">
+    <button class="btn btn-secondary" onclick="cambiarSemana(-1)">&#8592; Sem. anterior</button>
+    <button class="btn btn-secondary" onclick="cambiarSemana(1)">Sem. siguiente &#8594;</button>
+    <button class="btn btn-secondary" onclick="irHoy()">Hoy</button>
+    <button class="btn btn-primary" onclick="abrirModalTurno()">+ Nuevo Turno</button>
+  </div>
+
+  <!-- Vista semanal -->
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="semana-header" style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);"></div>
+    <div id="semana-body"   style="display:grid;grid-template-columns:repeat(7,1fr);min-height:180px;"></div>
+  </div>
+
+  <!-- Turnos del día seleccionado -->
+  <div style="margin-top:20px;">
+    <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;color:var(--accent);margin-bottom:12px;" id="titulo-dia-turnos">TURNOS DE HOY</div>
+    <div id="lista-turnos-dia"></div>
+  </div>
+</div>
+
+<!-- ===== ALERTAS ===== -->
+<div class="view" id="view-alertas">
+  <div class="page-title">Alertas de <span>Service</span></div>
+  <div class="page-sub">Vehículos próximos a vencer o ya vencidos — hacé clic para ver el historial y contactar al cliente</div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+    <button class="btn btn-secondary alerta-filtro active-filtro" onclick="filtrarAlertas('todos',this)">Todos</button>
+    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('vencido',this)" style="border-color:var(--bad);color:var(--bad);">Vencidos</button>
+    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('proximo_30',this)" style="border-color:var(--warn);color:var(--warn);">Próx. 30 días</button>
+    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('proximo_60',this)">Próx. 60 días</button>
+  </div>
+
+  <div id="lista-alertas">
+    <div style="color:var(--muted);text-align:center;padding:40px;">Cargando alertas...</div>
+  </div>
+</div>
+
+<!-- ===== AYUDA ===== -->
+<div class="view" id="view-ayuda">
+  <div class="page-title">Manual de <span>Usuario</span></div>
+  <div class="page-sub">Guía completa de uso del sistema TallerOS</div>
+
+  <div class="card">
+    <div class="card-title">📋 Nueva Ficha — Recepción de Vehículo</div>
+    <div class="help-section">
+      <p>Esta es la pantalla principal del sistema. Se usa cada vez que un vehículo ingresa al taller.</p>
+      <div class="help-step"><span class="help-num">1</span><div><strong>Datos del Vehículo</strong> — Completá la patente (campo obligatorio), marca, modelo, año y tipo de combustible. El número de chasis y motor son importantes para el historial permanente.</div></div>
+      <div class="help-step"><span class="help-num">2</span><div><strong>Datos del Cliente</strong> — Nombre del titular del vehículo y del responsable en caso de ser una persona diferente. El teléfono y email permiten contactar al cliente.</div></div>
+      <div class="help-step"><span class="help-num">3</span><div><strong>Trabajos Solicitados</strong> — Describí todos los trabajos que el cliente solicita. Podés detallar tipo de aceite, modelo de bujías, o cualquier descripción libre de la falla mecánica o eléctrica.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div><strong>Fluidos al Ingreso</strong> — Registrá el nivel actual de aceite, líquido de frenos y refrigerante. Esto queda en el historial como referencia.</div></div>
+      <div class="help-step"><span class="help-num">5</span><div><strong>Accesorios</strong> — Marcá todos los elementos que ingresan con el vehículo (baliza, extintor, rueda de auxilio, etc.). Esto protege al taller ante cualquier reclamo posterior.</div></div>
+      <div class="help-step"><span class="help-num">6</span><div><strong>Estado del Vehículo</strong> — Para cada componente de la lista (tablero, frenos, luces, etc.) marcá B (Bueno), R (Regular) o M (Malo). Si no lo revisás, dejalo sin marcar.</div></div>
+      <div class="help-step"><span class="help-num">7</span><div><strong>Guardar en BD</strong> — Al presionar este botón, todos los datos se guardan en la base de datos MongoDB. Si es la primera vez que ingresa esa patente, se genera automáticamente el código QR del vehículo.</div></div>
+      <div class="help-step"><span class="help-num">8</span><div><strong>Generar PDF</strong> — Genera una ficha imprimible para entregar al cliente como comprobante de ingreso, con espacio para firma.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 Historial de Vehículos</div>
+    <div class="help-section">
+      <p>Permite buscar cualquier vehículo por su patente y ver todo el historial de visitas al taller.</p>
+      <div class="help-step"><span class="help-num">1</span><div><strong>Búsqueda</strong> — Escribí la patente (parcial o completa) en el campo de búsqueda. Los resultados aparecen en tiempo real.</div></div>
+      <div class="help-step"><span class="help-num">2</span><div><strong>Ver Historial</strong> — Al hacer clic en un vehículo, se abre el historial completo con todos los servicios ordenados por fecha, incluyendo kilometraje y trabajos realizados.</div></div>
+      <div class="help-step"><span class="help-num">3</span><div><strong>Código QR</strong> — Desde el historial podés ver e imprimir el QR del vehículo. Este QR apunta a una página web con el historial completo, accesible escaneando desde cualquier celular.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div><strong>Exportar PDF</strong> — Genera un documento con todo el historial del vehículo, útil para entregar al cliente o como respaldo impreso.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📱 El Código QR — Para qué sirve</div>
+    <div class="help-section">
+      <p>Cada vehículo tiene un QR único que se genera automáticamente en su primera visita.</p>
+      <div class="help-step"><span class="help-num">!</span><div><strong>Cómo usarlo</strong> — Imprimilo en tamaño tarjeta de crédito y pedile al cliente que lo guarde en la guantera del auto.</div></div>
+      <div class="help-step"><span class="help-num">!</span><div><strong>Acceso de emergencia</strong> — Si el vehículo entra a cualquier otro taller o servicio técnico, el mecánico puede escanear el QR y ver al instante: marca/modelo, datos del titular, fluidos recomendados e historial completo de trabajos previos.</div></div>
+      <div class="help-step"><span class="help-num">!</span><div><strong>Requisito</strong> — El servidor TallerOS debe estar corriendo para que el QR funcione. Si el taller tiene conexión a internet fija, el QR funciona desde cualquier lugar.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🖼️ Cómo agregar el logo del taller</div>
+    <div class="help-section">
+      <div class="help-step"><span class="help-num">1</span><div>Preparar el archivo del logo en formato <strong>PNG o JPG</strong>. Se recomienda fondo transparente (PNG) y tamaño mínimo de 200x200 píxeles.</div></div>
+      <div class="help-step"><span class="help-num">2</span><div>Renombrar el archivo como exactamente: <strong>logo.png</strong></div></div>
+      <div class="help-step"><span class="help-num">3</span><div>Copiarlo en la carpeta: <strong>C:\taller-os\public\img\</strong></div></div>
+      <div class="help-step"><span class="help-num">4</span><div>Recargar el navegador (F5) — el logo aparecerá automáticamente en el encabezado.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💾 Backup — Cómo respaldar los datos</div>
+    <div class="help-section">
+      <div class="help-step"><span class="help-num">1</span><div>Los datos se guardan en la carpeta: <strong>C:\taller-os\data\db\</strong></div></div>
+      <div class="help-step"><span class="help-num">2</span><div>Para hacer un backup, copiá esa carpeta completa a un pendrive o disco externo.</div></div>
+      <div class="help-step"><span class="help-num">3</span><div>Se recomienda hacer backup al menos una vez por semana.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div>Para restaurar, copiá la carpeta de vuelta a la misma ubicación.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ACERCA DE ===== -->
+<div class="view" id="view-acerca">
+  <div class="page-title">Acerca <span>del Sistema</span></div>
+  <div class="page-sub">Información sobre TallerOS</div>
+
+  <div class="card" style="text-align:center;padding:40px 24px;">
+    <img id="about-logo" src="img/logo.png" alt="Logo del taller"
+         style="max-height:100px;max-width:280px;object-fit:contain;margin:0 auto 24px;display:block;border-radius:10px;"
+         onerror="this.style.display='none'">
+    <div style="font-family:'Bebas Neue';font-size:48px;letter-spacing:4px;color:var(--accent);margin-bottom:4px;">TallerOS</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:32px;letter-spacing:2px;text-transform:uppercase;">Sistema de Recepción de Vehículos</div>
+    <div style="width:60px;height:2px;background:var(--accent);margin:0 auto 32px;"></div>
+
+    <div style="font-size:15px;color:var(--text);margin-bottom:8px;">Versión 1.0</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:32px;">Base de datos MongoDB · Servidor Node.js · Acceso local</div>
+
+    <div style="background:var(--surface2);border-radius:12px;padding:24px;max-width:480px;margin:0 auto 32px;">
+      <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Desarrollado por</div>
+      <a href="https://autoelectrolab.com/" target="_blank"
+         style="font-family:'Bebas Neue';font-size:28px;color:var(--accent);text-decoration:none;letter-spacing:2px;display:block;margin-bottom:8px;transition:opacity .2s;"
+         onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
+        autoelectrolab.com
+      </a>
+      <div style="font-size:13px;color:var(--muted);">Soluciones tecnológicas para talleres mecánicos</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:500px;margin:0 auto;">
+      <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+        <div style="font-size:24px;margin-bottom:8px;">🗄️</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Base de Datos</div>
+        <div style="font-size:11px;color:var(--muted);">MongoDB</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+        <div style="font-size:24px;margin-bottom:8px;">⚙️</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Servidor</div>
+        <div style="font-size:11px;color:var(--muted);">Node.js + Express</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+        <div style="font-size:24px;margin-bottom:8px;">📱</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:4px;">QR Historial</div>
+        <div style="font-size:11px;color:var(--muted);">Acceso rápido</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;font-size:12px;color:var(--muted);">
+      Para soporte técnico visitá
+      <a href="https://autoelectrolab.com/" target="_blank" style="color:var(--accent);text-decoration:none;">autoelectrolab.com</a>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<!-- Modal historial vehículo -->
+<div class="modal-overlay" id="modal-hist">
+  <div class="modal">
+    <h2 id="mh-title">Historial</h2>
+    <div id="mh-content"></div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-hist')">Cerrar</button>
+      <button class="btn btn-secondary" id="btn-qr" onclick="mostrarQR()">📱 Ver QR</button>
+      <button class="btn btn-primary" onclick="exportarHistorial()">📄 Exportar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal QR -->
+<div class="modal-overlay" id="modal-qr">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <h2>Código QR del Vehículo</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Imprimilo y colocalo en la guantera. Cualquier mecánico podrá escanear y ver el historial completo.</p>
+    <div id="qr-container" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+    <div id="qr-url" style="font-family:'DM Mono';font-size:11px;color:var(--muted);word-break:break-all;margin-bottom:16px;"></div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-qr')">Cerrar</button>
+      <button class="btn btn-primary" onclick="imprimirQR()">🖨️ Imprimir QR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nuevo/editar turno -->
+<div class="modal-overlay" id="modal-turno">
+  <div class="modal" style="max-width:520px;">
+    <h2 id="mt-title">Nuevo Turno</h2>
+    <div class="grid-2" style="gap:12px;">
+      <div class="field">
+        <label>Fecha *</label>
+        <input type="date" id="t-fecha">
+      </div>
+      <div class="field">
+        <label>Hora *</label>
+        <select id="t-hora">
+          <option value="">— Seleccionar —</option>
+          <option>07:00</option><option>07:30</option><option>08:00</option><option>08:30</option>
+          <option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option>
+          <option>11:00</option><option>11:30</option><option>12:00</option><option>12:30</option>
+          <option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option>
+          <option>15:00</option><option>15:30</option><option>16:00</option><option>16:30</option>
+          <option>17:00</option><option>17:30</option><option>18:00</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Patente</label>
+        <input type="text" id="t-dominio" placeholder="AB123CD" style="text-transform:uppercase;font-family:'DM Mono';letter-spacing:2px;" oninput="this.value=this.value.toUpperCase();autocompletarTurno(this.value)">
+      </div>
+      <div class="field">
+        <label>Titular / Cliente *</label>
+        <input type="text" id="t-titular" placeholder="Nombre del cliente">
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" id="t-telefono" placeholder="11-1234-5678">
+      </div>
+      <div class="field">
+        <label>Mecánico asignado</label>
+        <input type="text" id="t-mecanico" placeholder="Nombre del mecánico">
+      </div>
+      <div class="field g2">
+        <label>Trabajo solicitado *</label>
+        <textarea id="t-trabajo" placeholder="Describí brevemente qué trae el vehículo..." style="min-height:60px;"></textarea>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="t-estado">
+          <option value="pendiente">Pendiente</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="atendido">Atendido</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Nota interna</label>
+        <input type="text" id="t-nota" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-turno')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarTurno()">💾 Guardar Turno</button>
+    </div>
+    <input type="hidden" id="t-id">
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://localhost:3000/api';
+let vehiculoCurrent = null;
+
+// ── Estado ítems ──────────────────────────────────
+const ITEMS = [
+  'Tablero','Filtro aire','Cinturones','Tuercas seguridad + adapt.',
+  'Espejos','Batería','Pastillas y Frenos','Estéreo',
+  'Función A/A','Catalizador','Parabrisas','Caño de escape',
+  'Limpiaparabrisas','Mangueras','Vidrios','Motor depósito agua',
+  'Luces altas','Butacas delanteras','Luces bajas','Butacas traseras',
+  'Luces posición','Cubrealfombras','Luces de giro','Alarma',
+  'Balizas','Cerraduras','Luces retroceso','Airbags',
+  'Llantas delanteras','Llantas traseras','Tapa tanque','Mecanismo apertura'
+];
+
+function buildEstadoGrid() {
+  document.getElementById('estado-grid').innerHTML = ITEMS.map(item => `
+    <div class="estado-item" data-item="${item}">
+      <div class="estado-item-label">${item}</div>
+      <div class="estado-mini">
+        <button class="b" onclick="selMini(this)">B</button>
+        <button class="r" onclick="selMini(this)">R</button>
+        <button class="m" onclick="selMini(this)">M</button>
+      </div>
+    </div>`).join('');
+}
+function selMini(btn) {
+  btn.closest('.estado-mini').querySelectorAll('button').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function selEstado(btn) {
+  btn.closest('.estado-group').querySelectorAll('button').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function toggleCheck(el) { el.classList.toggle('checked'); }
+
+// ── Conexión al servidor ───────────────────────────
+async function checkConn() {
+  try {
+    const r = await fetch(API + '/dashboard', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      document.getElementById('conn-dot').classList.add('online');
+      document.getElementById('conn-label').textContent = 'Base de datos conectada';
+      return true;
+    }
+  } catch(e) {}
+  document.getElementById('conn-dot').classList.remove('online');
+  document.getElementById('conn-label').textContent = 'Sin conexión al servidor';
+  return false;
+}
+
+// ── Guardar ficha ─────────────────────────────────
+async function guardarFicha() {
+  const dominio = document.getElementById('dominio').value.trim().toUpperCase();
+  if (!dominio) { toast('⚠️ El campo Patente es obligatorio', 'err'); return; }
+
+  const accesorios = [...document.querySelectorAll('.check-item.checked .check-label')].map(e => e.textContent);
+  const estado_items = [];
+  document.querySelectorAll('.estado-item').forEach(el => {
+    const sel = el.querySelector('.sel');
+    if (sel) estado_items.push({
+      nombre: el.dataset.item,
+      estado: sel.classList.contains('b') ? 'Bueno' : sel.classList.contains('r') ? 'Regular' : 'Malo'
+    });
+  });
+
+  // Construir servicios
+  const servicios_data = [];
+  const mm = document.getElementById('marca_modelo').value;
+  if (document.getElementById('aceite').value)
+    servicios_data.push({ tipo:'cambio_aceite', descripcion: 'Cambio aceite y filtro: ' + document.getElementById('aceite').value });
+  if (document.getElementById('bujias').value)
+    servicios_data.push({ tipo:'cambio_bujias', descripcion: 'Cambio bujías: ' + document.getElementById('bujias').value });
+  if (document.getElementById('arreglos_mecanicos').value)
+    servicios_data.push({ tipo:'mecanico', descripcion: document.getElementById('arreglos_mecanicos').value });
+  if (document.getElementById('arreglos_electricos').value)
+    servicios_data.push({ tipo:'electrico', descripcion: document.getElementById('arreglos_electricos').value });
+
+  const payload = {
+    ficha_data: {
+      dominio,
+      tipo_vehiculo:    document.getElementById('tipo_vehiculo').value,
+      marca:            mm.split(' ')[0] || '',
+      modelo:           mm.split(' ').slice(1).join(' ') || mm,
+      anio:             parseInt(document.getElementById('anio').value) || null,
+      tipo_caja:        document.getElementById('tipo_caja').value,
+      combustible:      document.getElementById('combustible').value,
+      chasis:           document.getElementById('chasis').value,
+      motor:            document.getElementById('motor').value,
+      vtv:              document.getElementById('vtv').value,
+      ecu:              document.getElementById('ecu').value,
+      km_inicial:       parseInt(document.getElementById('km_inicial').value) || null,
+      km_final:         parseInt(document.getElementById('km_final').value) || null,
+      titular:          document.getElementById('titular').value,
+      responsable:      document.getElementById('responsable').value,
+      telefono:         document.getElementById('telefono').value,
+      email:            document.getElementById('email').value,
+      medida_aceite:    document.getElementById('medida_aceite').value,
+      medida_frenos:    document.getElementById('medida_frenos').value,
+      medida_refrigerante: document.getElementById('medida_refrigerante').value,
+      accesorios,
+      otros_accesorios: document.getElementById('otros_accesorios').value,
+      estado_general:   document.querySelector('#estado-general .sel')?.textContent.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ]/g,'').trim() || '',
+      obs_visuales:     document.getElementById('obs_visuales').value,
+      obs_adicionales:  document.getElementById('obs_adicionales').value,
+      turno:            document.getElementById('turno').value,
+      fecha_ingreso:    document.getElementById('fecha_ingreso').value || new Date().toISOString(),
+      meses_intervalo:  parseInt(document.getElementById('meses_intervalo').value) || null,
+      km_intervalo:     parseInt(document.getElementById('km_intervalo').value)    || null,
+      nota_service:     document.getElementById('nota_service').value,
+    },
+    servicios_data,
+    estado_items,
+  };
+
+  const btn = document.getElementById('btn-guardar');
+  btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(API + '/fichas', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+
+    toast('✅ Ficha guardada en MongoDB correctamente');
+    limpiarForm();
+    // Si hay QR, ofrecer verlo
+    if (data.qr) {
+      setTimeout(() => {
+        if (confirm(`✅ Ficha guardada.\n\n¿Querés ver el código QR para el vehículo ${dominio}?`)) {
+          vehiculoCurrent = { dominio, qr: data.qr };
+          document.getElementById('qr-container').innerHTML = data.qr;
+          document.getElementById('qr-url').textContent = `http://localhost:3000/historial-publico/${dominio}`;
+          document.getElementById('modal-qr').classList.add('open');
+        }
+      }, 300);
+    }
+  } catch(e) {
+    toast('❌ Error: ' + e.message, 'err');
+  } finally {
+    btn.innerHTML = '💾 Guardar en BD';
+    btn.disabled = false;
+  }
+}
+
+// ── Buscar vehículo ────────────────────────────────
+let buscarTimer = null;
+async function buscarVehiculo(q) {
+  clearTimeout(buscarTimer);
+  const res = document.getElementById('resultados-busqueda');
+  if (q.length < 2) { res.innerHTML = ''; return; }
+  buscarTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(API + '/vehiculos/buscar/' + encodeURIComponent(q));
+      const vehiculos = await r.json();
+      if (!vehiculos.length) {
+        res.innerHTML = `<div style="color:var(--muted);text-align:center;padding:40px;">No se encontraron vehículos.</div>`;
+        return;
+      }
+      res.innerHTML = vehiculos.map(v => `
+        <div class="vehiculo-card" onclick="verHistorial('${v.dominio}')">
+          <div class="vehiculo-patente">${v.dominio}</div>
+          <div class="vehiculo-info">
+            <div class="vehiculo-marca">${v.marca || ''} ${v.modelo || ''} ${v.anio ? '('+v.anio+')' : ''}</div>
+            <div class="vehiculo-titular">Titular: ${v.titular_id?.nombre || '—'}</div>
+          </div>
+          <div class="vehiculo-badge">Ver historial →</div>
+        </div>`).join('');
+    } catch(e) {
+      res.innerHTML = `<div style="color:var(--bad);text-align:center;padding:24px;">Error al conectar con el servidor.</div>`;
+    }
+  }, 300);
+}
+
+// ── Ver historial ─────────────────────────────────
+async function verHistorial(dominio) {
+  try {
+    const r = await fetch(API + '/historial/' + dominio);
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+
+    const { vehiculo, historial } = data;
+    vehiculoCurrent = vehiculo;
+
+    document.getElementById('mh-title').textContent = `Historial — ${dominio}`;
+
+    let html = `<div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:18px;">
+      <div style="font-family:'Bebas Neue';font-size:20px;color:var(--accent);">${vehiculo.marca||''} ${vehiculo.modelo||''} ${vehiculo.anio||''}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted);margin-top:8px;">
+        <div>Titular: <span style="color:var(--text)">${vehiculo.titular_id?.nombre||'—'}</span></div>
+        <div>Combustible: <span style="color:var(--text)">${vehiculo.combustible||'—'}</span></div>
+        <div>Chasis: <span style="color:var(--text);font-family:'DM Mono';font-size:10px;">${vehiculo.chasis||'—'}</span></div>
+        <div>Motor: <span style="color:var(--text);font-family:'DM Mono';font-size:10px;">${vehiculo.motor||'—'}</span></div>
+      </div>
+    </div>
+    <div style="font-family:'Bebas Neue';font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:12px;">LÍNEA DE TIEMPO — ${historial.length} VISITA${historial.length!==1?'S':''}</div>
+    <div class="timeline">`;
+
+    historial.forEach(({ ficha, servicios }) => {
+      const tags = servicios.map(s => `<span class="tl-tag">${s.descripcion.substring(0,40)}</span>`).join('');
+      html += `<div class="tl-item"><div class="tl-dot"></div><div class="tl-card">
+        <div class="tl-date">${new Date(ficha.fecha_ingreso).toLocaleDateString('es-AR')} · ${ficha.turno||'—'}</div>
+        ${ficha.km_inicial ? `<div class="tl-km">⬤ ${parseInt(ficha.km_inicial).toLocaleString()} km</div>` : ''}
+        <div class="tl-tags">${tags}</div>
+        ${ficha.obs_adicionales ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">${ficha.obs_adicionales}</div>` : ''}
+      </div></div>`;
+    });
+
+    html += `</div>`;
+    document.getElementById('mh-content').innerHTML = html;
+    document.getElementById('modal-hist').classList.add('open');
+  } catch(e) {
+    toast('❌ Error al cargar historial: ' + e.message, 'err');
+  }
+}
+
+// ── QR ─────────────────────────────────────────────
+function mostrarQR() {
+  if (!vehiculoCurrent) return;
+  closeModal('modal-hist');
+  const dominio = vehiculoCurrent.dominio;
+  document.getElementById('qr-container').innerHTML = vehiculoCurrent.qr_codigo || '<p style="color:var(--muted)">QR no disponible</p>';
+  document.getElementById('qr-url').textContent = `http://localhost:3000/historial-publico/${dominio}`;
+  document.getElementById('modal-qr').classList.add('open');
+}
+function imprimirQR() {
+  const dominio = vehiculoCurrent?.dominio || '';
+  const qrHtml = document.getElementById('qr-container').innerHTML;
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>QR ${dominio}</title>
+    <style>body{font-family:sans-serif;text-align:center;padding:40px;}
+    .patente{font-size:28px;font-weight:900;letter-spacing:4px;color:#ff6b1a;margin-bottom:4px;}
+    .info{font-size:12px;color:#666;margin-top:8px;}
+    svg{max-width:220px;}</style></head><body>
+    <div class="patente">${dominio}</div>
+    <div style="margin:16px auto;display:inline-block;">${qrHtml}</div>
+    <div class="info">Escaneá para ver el historial completo del vehículo</div>
+    <div class="info" style="font-size:10px;color:#aaa;margin-top:4px;">Guardalo en la guantera</div>
+    </body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 400);
+}
+
+// ── Exportar historial PDF ───────────────────────────
+async function exportarHistorial() {
+  if (!vehiculoCurrent) return;
+  const dominio = vehiculoCurrent.dominio;
+  const r = await fetch(API + '/historial/' + dominio);
+  const { vehiculo, historial } = await r.json();
+
+  const win = window.open('','_blank');
+  const rows = historial.map(({ ficha, servicios }) => `
+    <tr><td>${new Date(ficha.fecha_ingreso).toLocaleDateString('es-AR')}</td>
+    <td>${ficha.km_inicial ? parseInt(ficha.km_inicial).toLocaleString()+' km' : '—'}</td>
+    <td>${servicios.map(s=>s.descripcion).join('; ') || '—'}</td>
+    <td>${ficha.turno||'—'}</td></tr>`).join('');
+
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Historial ${dominio}</title>
+    <style>body{font-family:Arial;font-size:13px;padding:24px;} h1{font-size:20px;} h2{background:#f0f0f0;padding:6px;border-left:4px solid #ff6b1a;font-size:14px;margin:14px 0 8px;} table{width:100%;border-collapse:collapse;} td,th{border:1px solid #ddd;padding:6px 9px;font-size:12px;} th{background:#f5f5f5;}</style>
+    </head><body>
+    <h1>📋 Historial del Vehículo — ${dominio}</h1>
+    <p>${vehiculo.marca||''} ${vehiculo.modelo||''} ${vehiculo.anio||''} | Titular: ${vehiculo.titular_id?.nombre||'—'}</p>
+    <h2>SERVICIOS REGISTRADOS (${historial.length})</h2>
+    <table><tr><th>Fecha</th><th>Kilometraje</th><th>Trabajos</th><th>Turno</th></tr>${rows}</table>
+    </body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),400);
+}
+
+// ── Dashboard ──────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const r = await fetch(API + '/dashboard');
+    const d = await r.json();
+    document.getElementById('s-fichas').textContent    = d.total_fichas;
+    document.getElementById('s-vehiculos').textContent = d.total_vehiculos;
+    document.getElementById('s-mes').textContent       = d.fichas_mes;
+    document.getElementById('s-alertas').textContent   = d.alertas_count || 0;
+    if (d.alertas_count > 0) document.getElementById('stat-alertas-card').style.borderColor = 'rgba(245,158,11,.4)';
+
+    // Turnos de hoy
+    const th = document.getElementById('dash-turnos-hoy');
+    if (!d.turnos_hoy?.length) {
+      th.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:12px 0;">Sin turnos para hoy.</div>`;
+    } else {
+      th.innerHTML = d.turnos_hoy.map(t => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div style="font-family:'Bebas Neue';font-size:18px;color:var(--accent);width:50px;">${t.hora}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">${t.trabajo}</div>
+            <div style="font-size:11px;color:var(--muted);">${t.dominio||''} ${t.titular?'· '+t.titular:''}</div>
+          </div>
+          <span class="turno-estado estado-${t.estado}" style="font-size:10px;">${{pendiente:'●',confirmado:'◆',atendido:'✓',cancelado:'✕'}[t.estado]}</span>
+        </div>`).join('');
+    }
+
+    // Últimas fichas
+    const ul = document.getElementById('ultimas-fichas');
+    if (!d.ultimas?.length) { ul.innerHTML = `<div style="color:var(--muted);padding:12px 0;font-size:13px;">Sin fichas aún.</div>`; return; }
+    ul.innerHTML = d.ultimas.map(f => `
+      <div class="vehiculo-card" style="padding:12px;" onclick="showView('historial');document.getElementById('search-patente').value='${f.dominio}';buscarVehiculo('${f.dominio}')">
+        <div class="vehiculo-patente" style="font-size:16px;">${f.dominio}</div>
+        <div class="vehiculo-info">
+          <div class="vehiculo-marca" style="font-size:13px;">${f.dominio}</div>
+          <div class="vehiculo-titular">${new Date(f.fecha_ingreso).toLocaleDateString('es-AR')} · ${f.turno||'Sin turno'}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('ultimas-fichas').innerHTML = `<div style="color:var(--bad);padding:12px;font-size:13px;">Error al cargar. ¿Está corriendo el servidor?</div>`;
+  }
+}
+
+// ── Utilidades ────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('nav button')[{nueva:0,turnos:1,alertas:2,historial:3,dashboard:4,ayuda:5,acerca:6}[name]].classList.add('active');
+  if (name==='dashboard') loadDashboard();
+  if (name==='alertas')   loadAlertas();
+  if (name==='turnos')    { irHoy(); }
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function limpiarForm() {
+  document.querySelectorAll('#view-nueva input,#view-nueva select,#view-nueva textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.check-item').forEach(el=>el.classList.remove('checked'));
+  document.querySelectorAll('.estado-btn,.estado-mini button').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('fecha_ingreso').value = new Date().toISOString().split('T')[0];
+  document.getElementById('preview-proximo-service').style.display = 'none';
+}
+
+// ── Preview próximo service ────────────────────────
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'meses_intervalo') {
+    const meses = parseInt(e.target.value);
+    const preview = document.getElementById('preview-proximo-service');
+    const texto   = document.getElementById('texto-proximo-service');
+    if (!meses) { preview.style.display='none'; return; }
+    const fecha = new Date(document.getElementById('fecha_ingreso').value || new Date());
+    fecha.setMonth(fecha.getMonth() + meses);
+    texto.textContent = fecha.toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
+    preview.style.display = 'block';
+  }
+});
+
+// ════════════════════════════════════════════════
+//  ALERTAS DE SERVICE
+// ════════════════════════════════════════════════
+let todasAlertas = [];
+
+async function loadAlertas() {
+  const cont = document.getElementById('lista-alertas');
+  try {
+    const r = await fetch(API + '/alertas');
+    todasAlertas = await r.json();
+    renderAlertas(todasAlertas);
+    // Actualizar badge en nav
+    const badge = document.getElementById('badge-alertas');
+    if (todasAlertas.length) {
+      badge.textContent = todasAlertas.length;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(e) {
+    cont.innerHTML = `<div style="color:var(--bad);text-align:center;padding:32px;">Error al cargar alertas. Verificá que el servidor esté corriendo.</div>`;
+  }
+}
+
+function renderAlertas(alertas) {
+  const cont = document.getElementById('lista-alertas');
+  if (!alertas.length) {
+    cont.innerHTML = `<div style="text-align:center;padding:48px;">
+      <div style="font-size:48px;margin-bottom:12px;">✅</div>
+      <div style="font-weight:600;font-size:16px;margin-bottom:4px;">Sin alertas pendientes</div>
+      <div style="color:var(--muted);font-size:13px;">Todos los vehículos están al día con el service.</div>
+    </div>`;
+    return;
+  }
+  cont.innerHTML = alertas.map(a => {
+    const v = a.vehiculo_id;
+    const c = a.cliente_id;
+    const fechaProx = a.fecha_proximo ? new Date(a.fecha_proximo).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' }) : '—';
+    const diasText = a.fecha_proximo ? (() => {
+      const dias = Math.floor((new Date(a.fecha_proximo) - new Date()) / (1000*60*60*24));
+      if (dias < 0) return `Venció hace ${Math.abs(dias)} días`;
+      if (dias === 0) return 'Vence hoy';
+      return `Vence en ${dias} días`;
+    })() : '';
+    const badgeText = { vencido:'VENCIDO', proximo_30:'PRÓX. 30 DÍAS', proximo_60:'PRÓX. 60 DÍAS' }[a.estado];
+
+    return `<div class="alerta-card ${a.estado}" onclick="verHistorial('${a.dominio}')">
+      <div class="vehiculo-patente" style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--accent);background:rgba(255,107,26,.1);padding:5px 12px;border-radius:6px;flex-shrink:0;">${a.dominio}</div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:14px;">${v?.marca||''} ${v?.modelo||''} ${v?.anio?'('+v.anio+')':''}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+          ${c?.nombre ? `👤 ${c.nombre}` : ''}
+          ${c?.telefono ? ` · 📞 ${c.telefono}` : ''}
+        </div>
+        <div style="font-size:12px;margin-top:4px;">📅 Próximo: <strong>${fechaProx}</strong> — ${diasText}</div>
+        ${a.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">📝 ${a.nota}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+        <span class="alerta-badge">${badgeText}</span>
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="event.stopPropagation();abrirTurnoDesdeAlerta('${a.dominio}','${c?.nombre||''}','${c?.telefono||''}')">+ Turno</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filtrarAlertas(tipo, btn) {
+  document.querySelectorAll('.alerta-filtro').forEach(b => b.classList.remove('active-filtro'));
+  btn.classList.add('active-filtro');
+  if (tipo === 'todos') renderAlertas(todasAlertas);
+  else renderAlertas(todasAlertas.filter(a => a.estado === tipo));
+}
+
+function abrirTurnoDesdeAlerta(dominio, titular, telefono) {
+  abrirModalTurno();
+  document.getElementById('t-dominio').value   = dominio;
+  document.getElementById('t-titular').value   = titular;
+  document.getElementById('t-telefono').value  = telefono;
+  document.getElementById('t-trabajo').value   = 'Service periódico';
+}
+
+// ════════════════════════════════════════════════
+//  TURNOS
+// ════════════════════════════════════════════════
+let semanaActual = new Date();
+let turnoEditandoId = null;
+
+function irHoy() {
+  semanaActual = new Date();
+  document.getElementById('turnos-fecha').value = semanaActual.toISOString().split('T')[0];
+  renderSemana();
+  cargarTurnosDia(semanaActual);
+}
+
+function cambiarSemana(dir) {
+  semanaActual.setDate(semanaActual.getDate() + dir * 7);
+  document.getElementById('turnos-fecha').value = semanaActual.toISOString().split('T')[0];
+  renderSemana();
+}
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'turnos-fecha') {
+    semanaActual = new Date(e.target.value + 'T12:00:00');
+    renderSemana();
+    cargarTurnosDia(semanaActual);
+  }
+});
+
+function getLunesDe(fecha) {
+  const d = new Date(fecha);
+  const dia = d.getDay();
+  const diff = dia === 0 ? -6 : 1 - dia;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+async function renderSemana() {
+  const lunes = getLunesDe(semanaActual);
+  const dias  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const hoyStr = new Date().toISOString().split('T')[0];
+
+  // Fetch turnos de la semana
+  const fechaStr = lunes.toISOString().split('T')[0];
+  let turnos = [];
+  try {
+    const r = await fetch(API + '/turnos/semana/' + fechaStr);
+    turnos = await r.json();
+  } catch(e) {}
+
+  // Header
+  const header = document.getElementById('semana-header');
+  header.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes); d.setDate(d.getDate() + i);
+    const str = d.toISOString().split('T')[0];
+    const esHoy = str === hoyStr;
+    const div = document.createElement('div');
+    div.className = 'dia-header' + (esHoy ? ' hoy' : '');
+    div.innerHTML = `<div>${dias[i]}</div><div style="font-size:18px;font-weight:700;">${d.getDate()}</div>`;
+    header.appendChild(div);
+  }
+
+  // Body
+  const body = document.getElementById('semana-body');
+  body.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes); d.setDate(d.getDate() + i);
+    const str = d.toISOString().split('T')[0];
+    const esHoy = str === hoyStr;
+    const turnosDia = turnos.filter(t => new Date(t.fecha).toISOString().split('T')[0] === str);
+    const div = document.createElement('div');
+    div.className = 'dia-col' + (esHoy ? ' hoy' : '');
+    div.onclick = () => { semanaActual = new Date(str+'T12:00:00'); document.getElementById('turnos-fecha').value = str; cargarTurnosDia(semanaActual); };
+    div.innerHTML = turnosDia.map(t =>
+      `<div class="turno-chip ${t.estado}" title="${t.hora} — ${t.titular||t.dominio||''}: ${t.trabajo}" onclick="event.stopPropagation();editarTurno('${t._id}')">${t.hora} ${t.dominio||t.titular||''}</div>`
+    ).join('') + `<div style="font-size:11px;color:var(--border);margin-top:4px;text-align:center;cursor:pointer;" onclick="event.stopPropagation();abrirModalTurnoFecha('${str}')">+ turno</div>`;
+    body.appendChild(div);
+  }
+}
+
+async function cargarTurnosDia(fecha) {
+  const str = typeof fecha === 'string' ? fecha : fecha.toISOString().split('T')[0];
+  const cont = document.getElementById('lista-turnos-dia');
+  const tit  = document.getElementById('titulo-dia-turnos');
+  const esHoy = str === new Date().toISOString().split('T')[0];
+  tit.textContent = esHoy ? 'TURNOS DE HOY' : 'TURNOS DEL ' + new Date(str+'T12:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long'}).toUpperCase();
+
+  try {
+    const r = await fetch(API + '/turnos/dia/' + str);
+    const turnos = await r.json();
+    if (!turnos.length) {
+      cont.innerHTML = `<div style="color:var(--muted);text-align:center;padding:28px;background:var(--surface);border-radius:10px;">Sin turnos para este día.<br><br><button class="btn btn-primary" onclick="abrirModalTurnoFecha('${str}')">+ Agregar turno</button></div>`;
+      return;
+    }
+    cont.innerHTML = turnos.map(t => `
+      <div class="turno-row">
+        <div class="turno-hora">${t.hora}</div>
+        <div class="turno-info">
+          <div class="turno-titulo">${t.trabajo}</div>
+          <div class="turno-sub">
+            ${t.dominio ? `🚗 ${t.dominio}` : ''}
+            ${t.titular ? ` · 👤 ${t.titular}` : ''}
+            ${t.telefono ? ` · 📞 ${t.telefono}` : ''}
+            ${t.mecanico ? ` · 🔧 ${t.mecanico}` : ''}
+          </div>
+          ${t.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;">📝 ${t.nota}</div>` : ''}
+        </div>
+        <span class="turno-estado estado-${t.estado}">${{pendiente:'Pendiente',confirmado:'Confirmado',atendido:'Atendido',cancelado:'Cancelado'}[t.estado]}</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="editarTurno('${t._id}')">✏️</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--bad);border-color:var(--bad);" onclick="eliminarTurno('${t._id}','${str}')">🗑</button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    cont.innerHTML = `<div style="color:var(--bad);text-align:center;padding:24px;">Error al cargar turnos.</div>`;
+  }
+}
+
+function abrirModalTurno() {
+  turnoEditandoId = null;
+  document.getElementById('mt-title').textContent = 'Nuevo Turno';
+  document.getElementById('t-id').value = '';
+  document.getElementById('t-fecha').value = document.getElementById('turnos-fecha').value || new Date().toISOString().split('T')[0];
+  ['t-hora','t-dominio','t-titular','t-telefono','t-mecanico','t-trabajo','t-nota'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('t-estado').value = 'pendiente';
+  document.getElementById('modal-turno').classList.add('open');
+}
+
+function abrirModalTurnoFecha(fechaStr) {
+  abrirModalTurno();
+  document.getElementById('t-fecha').value = fechaStr;
+}
+
+async function editarTurno(id) {
+  try {
+    // Buscar el turno en la lista cargada
+    const r = await fetch(API + '/turnos/dia/' + (document.getElementById('turnos-fecha').value || new Date().toISOString().split('T')[0]));
+    const turnos = await r.json();
+    const t = turnos.find(x => x._id === id);
+    if (!t) return;
+    turnoEditandoId = id;
+    document.getElementById('mt-title').textContent = 'Editar Turno';
+    document.getElementById('t-id').value      = id;
+    document.getElementById('t-fecha').value   = new Date(t.fecha).toISOString().split('T')[0];
+    document.getElementById('t-hora').value    = t.hora;
+    document.getElementById('t-dominio').value = t.dominio || '';
+    document.getElementById('t-titular').value = t.titular || '';
+    document.getElementById('t-telefono').value= t.telefono || '';
+    document.getElementById('t-mecanico').value= t.mecanico || '';
+    document.getElementById('t-trabajo').value = t.trabajo || '';
+    document.getElementById('t-estado').value  = t.estado  || 'pendiente';
+    document.getElementById('t-nota').value    = t.nota    || '';
+    document.getElementById('modal-turno').classList.add('open');
+  } catch(e) { toast('Error al cargar el turno', 'err'); }
+}
+
+async function guardarTurno() {
+  const hora    = document.getElementById('t-hora').value;
+  const titular = document.getElementById('t-titular').value.trim();
+  const trabajo = document.getElementById('t-trabajo').value.trim();
+  const fecha   = document.getElementById('t-fecha').value;
+  if (!hora || !titular || !trabajo || !fecha) {
+    toast('⚠️ Completá fecha, hora, cliente y trabajo', 'err'); return;
+  }
+  const payload = {
+    fecha:    new Date(fecha + 'T12:00:00'),
+    hora, titular, trabajo,
+    dominio:  document.getElementById('t-dominio').value.toUpperCase(),
+    telefono: document.getElementById('t-telefono').value,
+    mecanico: document.getElementById('t-mecanico').value,
+    estado:   document.getElementById('t-estado').value,
+    nota:     document.getElementById('t-nota').value,
+  };
+  try {
+    const id = document.getElementById('t-id').value;
+    const url    = id ? API + '/turnos/' + id : API + '/turnos';
+    const method = id ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    if (!r.ok) throw new Error((await r.json()).error);
+    closeModal('modal-turno');
+    toast('✅ Turno guardado');
+    renderSemana();
+    cargarTurnosDia(fecha);
+  } catch(e) { toast('Error: ' + e.message, 'err'); }
+}
+
+async function eliminarTurno(id, fechaStr) {
+  if (!confirm('¿Eliminar este turno?')) return;
+  try {
+    await fetch(API + '/turnos/' + id, { method:'DELETE' });
+    toast('Turno eliminado');
+    renderSemana();
+    cargarTurnosDia(fechaStr);
+  } catch(e) { toast('Error al eliminar', 'err'); }
+}
+
+async function autocompletarTurno(dominio) {
+  if (dominio.length < 5) return;
+  try {
+    const r = await fetch(API + '/vehiculos/' + dominio);
+    if (!r.ok) return;
+    const v = await r.json();
+    if (v.titular_id?.nombre && !document.getElementById('t-titular').value)
+      document.getElementById('t-titular').value = v.titular_id.nombre;
+    if (v.titular_id?.telefono && !document.getElementById('t-telefono').value)
+      document.getElementById('t-telefono').value = v.titular_id.telefono;
+  } catch(e) {}
+}
+
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = type==='err' ? 'err show' : 'show';
+  setTimeout(()=>t.className='', 3500);
+}
+
+function generarPDF() {
+  const dominio = document.getElementById('dominio').value.trim().toUpperCase() || 'SIN PATENTE';
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ficha ${dominio}</title>
+    <style>body{font-family:Arial;font-size:12px;padding:22px;} h1{font-size:18px;} h2{background:#f0f0f0;padding:5px 9px;border-left:4px solid #ff6b1a;font-size:13px;margin:14px 0 8px;} .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;} .field label{font-size:10px;color:#888;text-transform:uppercase;display:block;} .field span{font-weight:600;} .footer{margin-top:36px;border-top:1px solid #ccc;padding-top:14px;display:flex;justify-content:space-between;} .firma{border-bottom:1px solid #333;width:180px;height:38px;}</style>
+    </head><body>
+    <h1>🔧 Ficha de Recepción — ${dominio}</h1>
+    <p style="color:#888;font-size:11px;">Fecha: ${document.getElementById('fecha_ingreso').value} · Turno: ${document.getElementById('turno').value||'—'}</p>
+    <h2>VEHÍCULO</h2>
+    <div class="grid">
+      <div class="field"><label>Marca y Modelo</label><span>${document.getElementById('marca_modelo').value||'—'}</span></div>
+      <div class="field"><label>Año</label><span>${document.getElementById('anio').value||'—'}</span></div>
+      <div class="field"><label>Dominio</label><span>${dominio}</span></div>
+      <div class="field"><label>Combustible</label><span>${document.getElementById('combustible').value||'—'}</span></div>
+      <div class="field"><label>Chasis</label><span>${document.getElementById('chasis').value||'—'}</span></div>
+      <div class="field"><label>Motor</label><span>${document.getElementById('motor').value||'—'}</span></div>
+      <div class="field"><label>KM Inicial</label><span>${document.getElementById('km_inicial').value||'—'}</span></div>
+      <div class="field"><label>VTV</label><span>${document.getElementById('vtv').value||'—'}</span></div>
+    </div>
+    <h2>CLIENTE</h2>
+    <div class="grid">
+      <div class="field"><label>Titular</label><span>${document.getElementById('titular').value||'—'}</span></div>
+      <div class="field"><label>Teléfono</label><span>${document.getElementById('telefono').value||'—'}</span></div>
+    </div>
+    <h2>TRABAJOS</h2>
+    <p><strong>Aceite:</strong> ${document.getElementById('aceite').value||'—'}<br>
+    <strong>Bujías:</strong> ${document.getElementById('bujias').value||'—'}<br>
+    <strong>Mecánica:</strong> ${document.getElementById('arreglos_mecanicos').value||'—'}<br>
+    <strong>Eléctrico:</strong> ${document.getElementById('arreglos_electricos').value||'—'}</p>
+    <h2>OBSERVACIONES</h2>
+    <p>${document.getElementById('obs_visuales').value||'—'}</p>
+    <div class="footer">
+      <div><div class="firma"></div><div style="font-size:10px;margin-top:4px;">Firma y aclaración del cliente</div></div>
+      <div><div class="firma"></div><div style="font-size:10px;margin-top:4px;">Responsable del taller</div></div>
+    </div></body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),400);
+}
+
+// ── Init ──────────────────────────────────────────
+buildEstadoGrid();
+document.getElementById('fecha_ingreso').value = new Date().toISOString().split('T')[0];
+checkConn();
+setInterval(checkConn, 15000);
+// Cargar badge de alertas al inicio
+setTimeout(loadAlertas, 1500);
+</script>
+</body>
+</html>

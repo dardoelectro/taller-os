@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+.npm
+
+# Configuración
+.env
+.env.local
+.env.*.local
+
+# Base de datos (IMPORTANTE - datos privados)
+data/db/*
+!data/db/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archivos temporales
+*.tmp
+*.temp
