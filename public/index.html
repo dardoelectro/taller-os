@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TallerOS — Sistema de Recepción</title>
+<title>TallerOS â€” Sistema de RecepciÃ³n</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -70,7 +70,7 @@
   .check-item.checked { border-color: var(--accent); background: rgba(255,107,26,0.07); }
   .check-box { width: 17px; height: 17px; border-radius: 4px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
   .check-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
-  .check-box::after { content: '✓'; color: white; font-size: 10px; display: none; }
+  .check-box::after { content: 'âœ“'; color: white; font-size: 10px; display: none; }
   .check-item.checked .check-box::after { display: block; }
   .check-label { font-size: 13px; font-weight: 500; }
 
@@ -158,7 +158,7 @@
   .turno-chip.atendido   { background:var(--good); }
   .turno-chip.cancelado  { background:var(--muted); text-decoration:line-through; }
 
-  /* Turno del día lista */
+  /* Turno del dÃ­a lista */
   .turno-row { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:10px; display:flex; align-items:center; gap:14px; }
   .turno-hora { font-family:'Bebas Neue'; font-size:22px; color:var(--accent); flex-shrink:0; width:60px; }
   .turno-info { flex:1; }
@@ -230,6 +230,23 @@
   #main-header { display: flex; }
   #main-content { display: block; }
 
+
+  /* OPERARIOS Y TALLER STYLES */
+  #modal-operarios { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+  #modal-operarios.open { display: flex; }
+  #modal-operarios .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+  .operarios-tabla { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .operarios-tabla th, .operarios-tabla td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .operarios-tabla th { background: var(--surface2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .operarios-tabla tr:hover { background: var(--surface2); }
+  .operarios-tabla .btn-editar, .operarios-tabla .btn-eliminar { padding: 6px 12px; font-size: 11px; margin-right: 4px; }
+  .config-taller-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .config-taller-box h3 { margin: 0 0 12px 0; font-size: 14px; color: var(--accent); }
+  .config-campo { margin-bottom: 12px; }
+  .config-campo label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .config-campo input, .config-campo textarea { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans'; font-size: 13px; }
+  .config-campo textarea { resize: vertical; min-height: 80px; }
+
   @media (max-width:700px) {
     .grid-2,.grid-3 { grid-template-columns: 1fr; }
     .g2,.g3 { grid-column: span 1; }
@@ -244,17 +261,17 @@
 <!-- PANTALLA DE LOGIN -->
 <div id="login-screen" class="login-container">
   <div class="login-box">
-    <div class="login-logo">🔧 TallerOS</div>
+    <div class="login-logo">ðŸ”§ TallerOS</div>
     <div class="login-sub">Acceso al sistema</div>
     <div class="login-field">
       <label>Email</label>
       <input type="email" id="login-email" placeholder="admin@taller.com" autocomplete="off">
     </div>
     <div class="login-field">
-      <label>Contraseña</label>
-      <input type="password" id="login-password" placeholder="••••••">
+      <label>ContraseÃ±a</label>
+      <input type="password" id="login-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢">
     </div>
-    <button class="login-btn" onclick="hacerLogin()">Iniciar sesión</button>
+    <button class="login-btn" onclick="hacerLogin()">Iniciar sesiÃ³n</button>
     <div id="login-error" class="login-error"></div>
   </div>
 </div>
@@ -274,7 +291,7 @@
   <nav>
     <button class="active" onclick="showView('nueva')">Nueva Ficha</button>
     <button onclick="showView('turnos')">Turnos</button>
-    <button onclick="showView('alertas')">⚠ Alertas <span id="badge-alertas" style="display:none;background:var(--bad);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
+    <button onclick="showView('alertas')">âš  Alertas <span id="badge-alertas" style="display:none;background:var(--bad);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
     <button onclick="showView('historial')">Historial</button>
     <button onclick="showView('dashboard')">Dashboard</button>
     <button onclick="showView('ayuda')">Ayuda</button>
@@ -286,7 +303,7 @@
     <div class="user-info">
       <div class="user-avatar" id="user-avatar">U</div>
       <span class="user-name" id="user-name">Usuario</span>
-      <button class="logout-btn" onclick="hacerLogout()" title="Cerrar sesión">🚪</button>
+      <button class="logout-btn" onclick="hacerLogout()" title="Cerrar sesiÃ³n">ðŸšª</button>
     </div>
   </div>
 </header>
@@ -295,23 +312,23 @@
 
 <!-- ===== NUEVA FICHA ===== -->
 <div class="view active" id="view-nueva">
-  <div class="page-title">Recepción de <span>Vehículo</span></div>
-  <div class="page-sub">Completá la ficha — se guarda automáticamente en la base de datos</div>
+  <div class="page-title">RecepciÃ³n de <span>VehÃ­culo</span></div>
+  <div class="page-sub">CompletÃ¡ la ficha â€” se guarda automÃ¡ticamente en la base de datos</div>
 
   <div class="card">
-    <div class="card-title">🚗 Datos del Vehículo</div>
+    <div class="card-title">ðŸš— Datos del VehÃ­culo</div>
     <div class="grid-3">
       <div class="field"><label>Tipo</label>
-        <select id="tipo_vehiculo"><option value="">—</option><option>Auto</option><option>Camioneta</option><option>Moto</option><option>Camión</option><option>Utilitario</option><option>SUV</option></select></div>
-      <div class="field"><label>Año</label><input type="number" id="anio" placeholder="2020" min="1970" max="2030"></div>
+        <select id="tipo_vehiculo"><option value="">â€”</option><option>Auto</option><option>Camioneta</option><option>Moto</option><option>CamiÃ³n</option><option>Utilitario</option><option>SUV</option></select></div>
+      <div class="field"><label>AÃ±o</label><input type="number" id="anio" placeholder="2020" min="1970" max="2030"></div>
       <div class="field"><label>Tipo de Caja</label>
-        <select id="tipo_caja"><option value="">—</option><option>Manual</option><option>Automática</option><option>CVT</option><option>Doble Embrague</option></select></div>
+        <select id="tipo_caja"><option value="">â€”</option><option>Manual</option><option>AutomÃ¡tica</option><option>CVT</option><option>Doble Embrague</option></select></div>
       <div class="field g2"><label>Marca y Modelo</label><input type="text" id="marca_modelo" placeholder="Ej: Toyota Corolla"></div>
       <div class="field"><label>Combustible</label>
-        <select id="combustible"><option value="">—</option><option>Nafta</option><option>Diesel</option><option>GNC + Nafta</option><option>Eléctrico</option><option>Híbrido</option></select></div>
+        <select id="combustible"><option value="">â€”</option><option>Nafta</option><option>Diesel</option><option>GNC + Nafta</option><option>ElÃ©ctrico</option><option>HÃ­brido</option></select></div>
       <div class="field"><label>Dominio (Patente) *</label><input type="text" id="dominio" placeholder="AB123CD" style="text-transform:uppercase;font-family:'DM Mono';font-size:16px;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()"></div>
-      <div class="field"><label>Nº Chasis</label><input type="text" id="chasis" style="font-family:'DM Mono';font-size:12px;"></div>
-      <div class="field"><label>Nº Motor</label><input type="text" id="motor" style="font-family:'DM Mono';font-size:12px;"></div>
+      <div class="field"><label>NÂº Chasis</label><input type="text" id="chasis" style="font-family:'DM Mono';font-size:12px;"></div>
+      <div class="field"><label>NÂº Motor</label><input type="text" id="motor" style="font-family:'DM Mono';font-size:12px;"></div>
       <div class="field"><label>VTV (vencimiento)</label><input type="text" id="vtv" placeholder="mm/aaaa"></div>
       <div class="field"><label>ECU</label><input type="text" id="ecu"></div>
       <div class="field"><label>KM Inicial</label><input type="number" id="km_inicial" placeholder="0"></div>
@@ -320,75 +337,75 @@
   </div>
 
   <div class="card">
-    <div class="card-title">👤 Datos del Cliente</div>
+    <div class="card-title">ðŸ‘¤ Datos del Cliente</div>
     <div class="grid-2">
-      <div class="field"><label>Titular del Vehículo</label><input type="text" id="titular" placeholder="Nombre y apellido"></div>
-      <div class="field"><label>Responsable (si difiere)</label><input type="text" id="responsable" placeholder="Quién trae el auto"></div>
-      <div class="field"><label>Teléfono</label><input type="tel" id="telefono" placeholder="11-1234-5678"></div>
+      <div class="field"><label>Titular del VehÃ­culo</label><input type="text" id="titular" placeholder="Nombre y apellido"></div>
+      <div class="field"><label>Responsable (si difiere)</label><input type="text" id="responsable" placeholder="QuiÃ©n trae el auto"></div>
+      <div class="field"><label>TelÃ©fono</label><input type="tel" id="telefono" placeholder="11-1234-5678"></div>
       <div class="field"><label>Email</label><input type="email" id="email" placeholder="correo@ejemplo.com"></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">🔩 Trabajos Solicitados</div>
+    <div class="card-title">ðŸ”© Trabajos Solicitados</div>
     <div class="grid-2">
       <div class="field g2"><label>Cambio de Aceite y Filtro</label><input type="text" id="aceite" placeholder="Tipo/grado si corresponde"></div>
-      <div class="field g2"><label>Cambio de Bujías</label><input type="text" id="bujias" placeholder="Detallar si aplica"></div>
-      <div class="field g2"><label>Arreglos Mecánicos</label><textarea id="arreglos_mecanicos" placeholder="Describir trabajos mecánicos..."></textarea></div>
-      <div class="field g2"><label>Arreglos Eléctricos</label><textarea id="arreglos_electricos" placeholder="Describir trabajos eléctricos..."></textarea></div>
+      <div class="field g2"><label>Cambio de BujÃ­as</label><input type="text" id="bujias" placeholder="Detallar si aplica"></div>
+      <div class="field g2"><label>Arreglos MecÃ¡nicos</label><textarea id="arreglos_mecanicos" placeholder="Describir trabajos mecÃ¡nicos..."></textarea></div>
+      <div class="field g2"><label>Arreglos ElÃ©ctricos</label><textarea id="arreglos_electricos" placeholder="Describir trabajos elÃ©ctricos..."></textarea></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">💧 Fluidos al Ingreso</div>
+    <div class="card-title">ðŸ’§ Fluidos al Ingreso</div>
     <div class="grid-3">
       <div class="field"><label>Aceite</label>
-        <select id="medida_aceite"><option value="">—</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Mínimo</option></select></div>
-      <div class="field"><label>Líquido de Frenos</label>
-        <select id="medida_frenos"><option value="">—</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Mínimo</option></select></div>
+        <select id="medida_aceite"><option value="">â€”</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>MÃ­nimo</option></select></div>
+      <div class="field"><label>LÃ­quido de Frenos</label>
+        <select id="medida_frenos"><option value="">â€”</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>MÃ­nimo</option></select></div>
       <div class="field"><label>Refrigerante</label>
-        <select id="medida_refrigerante"><option value="">—</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Mínimo</option></select></div>
+        <select id="medida_refrigerante"><option value="">â€”</option><option>Lleno</option><option>3/4</option><option>1/2</option><option>1/4</option><option>MÃ­nimo</option></select></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">🎒 Accesorios del Vehículo</div>
+    <div class="card-title">ðŸŽ’ Accesorios del VehÃ­culo</div>
     <div class="checklist">
       <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Baliza emergencia</span></label>
       <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Extintor</span></label>
       <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Rueda auxilio</span></label>
       <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Crique</span></label>
       <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Herramientas</span></label>
-      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Botiquín</span></label>
+      <label class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">BotiquÃ­n</span></label>
     </div>
-    <div class="field" style="margin-top:10px;"><label>Otros accesorios</label><input type="text" id="otros_accesorios" placeholder="GPS, cargador, documentación..."></div>
+    <div class="field" style="margin-top:10px;"><label>Otros accesorios</label><input type="text" id="otros_accesorios" placeholder="GPS, cargador, documentaciÃ³n..."></div>
   </div>
 
   <div class="card">
-    <div class="card-title">🔍 Estado del Vehículo al Ingreso</div>
+    <div class="card-title">ðŸ” Estado del VehÃ­culo al Ingreso</div>
     <div class="grid-3" id="estado-grid"></div>
   </div>
 
   <div class="card">
-    <div class="card-title">👁️ Observaciones Visuales</div>
+    <div class="card-title">ðŸ‘ï¸ Observaciones Visuales</div>
     <div class="field" style="margin-bottom:14px;"><label>Estado General</label>
       <div class="estado-group" id="estado-general">
-        <button class="estado-btn bueno" onclick="selEstado(this,'estado-general')">✅ Bueno</button>
-        <button class="estado-btn regular" onclick="selEstado(this,'estado-general')">⚠️ Regular</button>
-        <button class="estado-btn malo" onclick="selEstado(this,'estado-general')">❌ Malo</button>
+        <button class="estado-btn bueno" onclick="selEstado(this,'estado-general')">âœ… Bueno</button>
+        <button class="estado-btn regular" onclick="selEstado(this,'estado-general')">âš ï¸ Regular</button>
+        <button class="estado-btn malo" onclick="selEstado(this,'estado-general')">âŒ Malo</button>
       </div>
     </div>
-    <div class="field"><label>Detalles / Golpes / Marcas</label><textarea id="obs_visuales" placeholder="Rayones, abolladuras, daños visibles..."></textarea></div>
+    <div class="field"><label>Detalles / Golpes / Marcas</label><textarea id="obs_visuales" placeholder="Rayones, abolladuras, daÃ±os visibles..."></textarea></div>
   </div>
 
   <div class="card">
-    <div class="card-title">🔧 Próximo Service</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Completá solo si en esta visita se realizó un service. El sistema generará la alerta automáticamente.</p>
+    <div class="card-title">ðŸ”§ PrÃ³ximo Service</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">CompletÃ¡ solo si en esta visita se realizÃ³ un service. El sistema generarÃ¡ la alerta automÃ¡ticamente.</p>
     <div class="grid-3">
       <div class="field">
         <label>Intervalo en meses</label>
         <select id="meses_intervalo">
-          <option value="">— No aplica —</option>
+          <option value="">â€” No aplica â€”</option>
           <option value="3">Cada 3 meses</option>
           <option value="6">Cada 6 meses</option>
           <option value="9">Cada 9 meses</option>
@@ -402,39 +419,39 @@
         <input type="number" id="km_intervalo" placeholder="Ej: 10000">
       </div>
       <div class="field">
-        <label>Nota para el mecánico</label>
+        <label>Nota para el mecÃ¡nico</label>
         <input type="text" id="nota_service" placeholder="Ej: usar aceite 5W40">
       </div>
     </div>
     <div id="preview-proximo-service" style="margin-top:12px;display:none;">
       <div style="background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.3);border-radius:8px;padding:12px;font-size:13px;color:var(--accent);">
-        📅 Próximo service estimado: <strong id="texto-proximo-service"></strong>
+        ðŸ“… PrÃ³ximo service estimado: <strong id="texto-proximo-service"></strong>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">✍️ Confirmación</div>
+    <div class="card-title">âœï¸ ConfirmaciÃ³n</div>
     <div class="grid-2">
-      <div class="field"><label>Turno / Mecánico responsable</label><input type="text" id="turno" placeholder="Ej: Turno mañana — Juan"></div>
+      <div class="field"><label>Turno / MecÃ¡nico responsable</label><input type="text" id="turno" placeholder="Ej: Turno maÃ±ana â€” Juan"></div>
       <div class="field"><label>Fecha de Ingreso</label><input type="date" id="fecha_ingreso"></div>
       <div class="field g2"><label>Observaciones adicionales</label><textarea id="obs_adicionales" placeholder="Cualquier dato relevante..."></textarea></div>
     </div>
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-ghost" onclick="limpiarForm()">🗑 Limpiar</button>
-    <button class="btn btn-secondary" onclick="generarPDF()">📄 PDF Ficha</button>
-    <button class="btn btn-primary" id="btn-guardar" onclick="guardarFicha()">💾 Guardar en BD</button>
+    <button class="btn btn-ghost" onclick="limpiarForm()">ðŸ—‘ Limpiar</button>
+    <button class="btn btn-secondary" onclick="generarPDF()">ðŸ“„ PDF Ficha</button>
+    <button class="btn btn-primary" id="btn-guardar" onclick="guardarFicha()">ðŸ’¾ Guardar en BD</button>
   </div>
 </div>
 
 <!-- ===== HISTORIAL ===== -->
 <div class="view" id="view-historial">
-  <div class="page-title">Historial de <span>Vehículos</span></div>
-  <div class="page-sub">Buscá por patente para ver el historial completo</div>
+  <div class="page-title">Historial de <span>VehÃ­culos</span></div>
+  <div class="page-sub">BuscÃ¡ por patente para ver el historial completo</div>
   <div class="search-bar">
-    <span class="search-icon">🔍</span>
+    <span class="search-icon">ðŸ”</span>
     <input type="text" id="search-patente" placeholder="PATENTE..." oninput="buscarVehiculo(this.value)">
   </div>
   <div id="resultados-busqueda"></div>
@@ -443,24 +460,24 @@
 <!-- ===== DASHBOARD ===== -->
 <div class="view" id="view-dashboard">
   <div class="page-title"><span>Dashboard</span></div>
-  <div class="page-sub">Estadísticas del taller</div>
+  <div class="page-sub">EstadÃ­sticas del taller</div>
   <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-    <div class="stat-card"><div class="stat-num" id="s-fichas">—</div><div class="stat-label">Fichas Totales</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-vehiculos">—</div><div class="stat-label">Vehículos Únicos</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-mes">—</div><div class="stat-label">Este Mes</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-fichas">â€”</div><div class="stat-label">Fichas Totales</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-vehiculos">â€”</div><div class="stat-label">VehÃ­culos Ãšnicos</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-mes">â€”</div><div class="stat-label">Este Mes</div></div>
     <div class="stat-card" id="stat-alertas-card" style="cursor:pointer;" onclick="showView('alertas')">
-      <div class="stat-num" id="s-alertas" style="color:var(--warn);">—</div>
+      <div class="stat-num" id="s-alertas" style="color:var(--warn);">â€”</div>
       <div class="stat-label">Alertas Service</div>
     </div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
     <div class="card">
-      <div class="card-title">📅 Turnos de Hoy</div>
+      <div class="card-title">ðŸ“… Turnos de Hoy</div>
       <div id="dash-turnos-hoy"></div>
     </div>
     <div class="card">
-      <div class="card-title">📋 Últimos Ingresos</div>
+      <div class="card-title">ðŸ“‹ Ãšltimos Ingresos</div>
       <div id="ultimas-fichas"></div>
     </div>
   </div>
@@ -469,9 +486,9 @@
 <!-- ===== TURNOS ===== -->
 <div class="view" id="view-turnos">
   <div class="page-title">Agenda de <span>Turnos</span></div>
-  <div class="page-sub">Turnos del día y vista semanal</div>
+  <div class="page-sub">Turnos del dÃ­a y vista semanal</div>
 
-  <!-- Selector de fecha y botón nuevo turno -->
+  <!-- Selector de fecha y botÃ³n nuevo turno -->
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
     <input type="date" id="turnos-fecha" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans';font-size:14px;padding:10px 14px;outline:none;">
     <button class="btn btn-secondary" onclick="cambiarSemana(-1)">&#8592; Sem. anterior</button>
@@ -486,7 +503,7 @@
     <div id="semana-body"   style="display:grid;grid-template-columns:repeat(7,1fr);min-height:180px;"></div>
   </div>
 
-  <!-- Turnos del día seleccionado -->
+  <!-- Turnos del dÃ­a seleccionado -->
   <div style="margin-top:20px;">
     <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;color:var(--accent);margin-bottom:12px;" id="titulo-dia-turnos">TURNOS DE HOY</div>
     <div id="lista-turnos-dia"></div>
@@ -496,14 +513,14 @@
 <!-- ===== ALERTAS ===== -->
 <div class="view" id="view-alertas">
   <div class="page-title">Alertas de <span>Service</span></div>
-  <div class="page-sub">Vehículos próximos a vencer o ya vencidos — hacé clic para ver el historial y contactar al cliente</div>
+  <div class="page-sub">VehÃ­culos prÃ³ximos a vencer o ya vencidos â€” hacÃ© clic para ver el historial y contactar al cliente</div>
 
   <!-- Filtros -->
   <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
     <button class="btn btn-secondary alerta-filtro active-filtro" onclick="filtrarAlertas('todos',this)">Todos</button>
     <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('vencido',this)" style="border-color:var(--bad);color:var(--bad);">Vencidos</button>
-    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('proximo_30',this)" style="border-color:var(--warn);color:var(--warn);">Próx. 30 días</button>
-    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('proximo_60',this)">Próx. 60 días</button>
+    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('proximo_30',this)" style="border-color:var(--warn);color:var(--warn);">PrÃ³x. 30 dÃ­as</button>
+    <button class="btn btn-secondary alerta-filtro" onclick="filtrarAlertas('proximo_60',this)">PrÃ³x. 60 dÃ­as</button>
   </div>
 
   <div id="lista-alertas">
@@ -514,61 +531,61 @@
 <!-- ===== AYUDA ===== -->
 <div class="view" id="view-ayuda">
   <div class="page-title">Manual de <span>Usuario</span></div>
-  <div class="page-sub">Guía completa de uso del sistema TallerOS</div>
+  <div class="page-sub">GuÃ­a completa de uso del sistema TallerOS</div>
 
   <div class="card">
-    <div class="card-title">📋 Nueva Ficha — Recepción de Vehículo</div>
+    <div class="card-title">ðŸ“‹ Nueva Ficha â€” RecepciÃ³n de VehÃ­culo</div>
     <div class="help-section">
-      <p>Esta es la pantalla principal del sistema. Se usa cada vez que un vehículo ingresa al taller.</p>
-      <div class="help-step"><span class="help-num">1</span><div><strong>Datos del Vehículo</strong> — Completá la patente (campo obligatorio), marca, modelo, año y tipo de combustible. El número de chasis y motor son importantes para el historial permanente.</div></div>
-      <div class="help-step"><span class="help-num">2</span><div><strong>Datos del Cliente</strong> — Nombre del titular del vehículo y del responsable en caso de ser una persona diferente. El teléfono y email permiten contactar al cliente.</div></div>
-      <div class="help-step"><span class="help-num">3</span><div><strong>Trabajos Solicitados</strong> — Describí todos los trabajos que el cliente solicita. Podés detallar tipo de aceite, modelo de bujías, o cualquier descripción libre de la falla mecánica o eléctrica.</div></div>
-      <div class="help-step"><span class="help-num">4</span><div><strong>Fluidos al Ingreso</strong> — Registrá el nivel actual de aceite, líquido de frenos y refrigerante. Esto queda en el historial como referencia.</div></div>
-      <div class="help-step"><span class="help-num">5</span><div><strong>Accesorios</strong> — Marcá todos los elementos que ingresan con el vehículo (baliza, extintor, rueda de auxilio, etc.). Esto protege al taller ante cualquier reclamo posterior.</div></div>
-      <div class="help-step"><span class="help-num">6</span><div><strong>Estado del Vehículo</strong> — Para cada componente de la lista (tablero, frenos, luces, etc.) marcá B (Bueno), R (Regular) o M (Malo). Si no lo revisás, dejalo sin marcar.</div></div>
-      <div class="help-step"><span class="help-num">7</span><div><strong>Guardar en BD</strong> — Al presionar este botón, todos los datos se guardan en la base de datos MongoDB. Si es la primera vez que ingresa esa patente, se genera automáticamente el código QR del vehículo.</div></div>
-      <div class="help-step"><span class="help-num">8</span><div><strong>Generar PDF</strong> — Genera una ficha imprimible para entregar al cliente como comprobante de ingreso, con espacio para firma.</div></div>
+      <p>Esta es la pantalla principal del sistema. Se usa cada vez que un vehÃ­culo ingresa al taller.</p>
+      <div class="help-step"><span class="help-num">1</span><div><strong>Datos del VehÃ­culo</strong> â€” CompletÃ¡ la patente (campo obligatorio), marca, modelo, aÃ±o y tipo de combustible. El nÃºmero de chasis y motor son importantes para el historial permanente.</div></div>
+      <div class="help-step"><span class="help-num">2</span><div><strong>Datos del Cliente</strong> â€” Nombre del titular del vehÃ­culo y del responsable en caso de ser una persona diferente. El telÃ©fono y email permiten contactar al cliente.</div></div>
+      <div class="help-step"><span class="help-num">3</span><div><strong>Trabajos Solicitados</strong> â€” DescribÃ­ todos los trabajos que el cliente solicita. PodÃ©s detallar tipo de aceite, modelo de bujÃ­as, o cualquier descripciÃ³n libre de la falla mecÃ¡nica o elÃ©ctrica.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div><strong>Fluidos al Ingreso</strong> â€” RegistrÃ¡ el nivel actual de aceite, lÃ­quido de frenos y refrigerante. Esto queda en el historial como referencia.</div></div>
+      <div class="help-step"><span class="help-num">5</span><div><strong>Accesorios</strong> â€” MarcÃ¡ todos los elementos que ingresan con el vehÃ­culo (baliza, extintor, rueda de auxilio, etc.). Esto protege al taller ante cualquier reclamo posterior.</div></div>
+      <div class="help-step"><span class="help-num">6</span><div><strong>Estado del VehÃ­culo</strong> â€” Para cada componente de la lista (tablero, frenos, luces, etc.) marcÃ¡ B (Bueno), R (Regular) o M (Malo). Si no lo revisÃ¡s, dejalo sin marcar.</div></div>
+      <div class="help-step"><span class="help-num">7</span><div><strong>Guardar en BD</strong> â€” Al presionar este botÃ³n, todos los datos se guardan en la base de datos MongoDB. Si es la primera vez que ingresa esa patente, se genera automÃ¡ticamente el cÃ³digo QR del vehÃ­culo.</div></div>
+      <div class="help-step"><span class="help-num">8</span><div><strong>Generar PDF</strong> â€” Genera una ficha imprimible para entregar al cliente como comprobante de ingreso, con espacio para firma.</div></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">🔍 Historial de Vehículos</div>
+    <div class="card-title">ðŸ” Historial de VehÃ­culos</div>
     <div class="help-section">
-      <p>Permite buscar cualquier vehículo por su patente y ver todo el historial de visitas al taller.</p>
-      <div class="help-step"><span class="help-num">1</span><div><strong>Búsqueda</strong> — Escribí la patente (parcial o completa) en el campo de búsqueda. Los resultados aparecen en tiempo real.</div></div>
-      <div class="help-step"><span class="help-num">2</span><div><strong>Ver Historial</strong> — Al hacer clic en un vehículo, se abre el historial completo con todos los servicios ordenados por fecha, incluyendo kilometraje y trabajos realizados.</div></div>
-      <div class="help-step"><span class="help-num">3</span><div><strong>Código QR</strong> — Desde el historial podés ver e imprimir el QR del vehículo. Este QR apunta a una página web con el historial completo, accesible escaneando desde cualquier celular.</div></div>
-      <div class="help-step"><span class="help-num">4</span><div><strong>Exportar PDF</strong> — Genera un documento con todo el historial del vehículo, útil para entregar al cliente o como respaldo impreso.</div></div>
+      <p>Permite buscar cualquier vehÃ­culo por su patente y ver todo el historial de visitas al taller.</p>
+      <div class="help-step"><span class="help-num">1</span><div><strong>BÃºsqueda</strong> â€” EscribÃ­ la patente (parcial o completa) en el campo de bÃºsqueda. Los resultados aparecen en tiempo real.</div></div>
+      <div class="help-step"><span class="help-num">2</span><div><strong>Ver Historial</strong> â€” Al hacer clic en un vehÃ­culo, se abre el historial completo con todos los servicios ordenados por fecha, incluyendo kilometraje y trabajos realizados.</div></div>
+      <div class="help-step"><span class="help-num">3</span><div><strong>CÃ³digo QR</strong> â€” Desde el historial podÃ©s ver e imprimir el QR del vehÃ­culo. Este QR apunta a una pÃ¡gina web con el historial completo, accesible escaneando desde cualquier celular.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div><strong>Exportar PDF</strong> â€” Genera un documento con todo el historial del vehÃ­culo, Ãºtil para entregar al cliente o como respaldo impreso.</div></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">📱 El Código QR — Para qué sirve</div>
+    <div class="card-title">ðŸ“± El CÃ³digo QR â€” Para quÃ© sirve</div>
     <div class="help-section">
-      <p>Cada vehículo tiene un QR único que se genera automáticamente en su primera visita.</p>
-      <div class="help-step"><span class="help-num">!</span><div><strong>Cómo usarlo</strong> — Imprimilo en tamaño tarjeta de crédito y pedile al cliente que lo guarde en la guantera del auto.</div></div>
-      <div class="help-step"><span class="help-num">!</span><div><strong>Acceso de emergencia</strong> — Si el vehículo entra a cualquier otro taller o servicio técnico, el mecánico puede escanear el QR y ver al instante: marca/modelo, datos del titular, fluidos recomendados e historial completo de trabajos previos.</div></div>
-      <div class="help-step"><span class="help-num">!</span><div><strong>Requisito</strong> — El servidor TallerOS debe estar corriendo para que el QR funcione. Si el taller tiene conexión a internet fija, el QR funciona desde cualquier lugar.</div></div>
+      <p>Cada vehÃ­culo tiene un QR Ãºnico que se genera automÃ¡ticamente en su primera visita.</p>
+      <div class="help-step"><span class="help-num">!</span><div><strong>CÃ³mo usarlo</strong> â€” Imprimilo en tamaÃ±o tarjeta de crÃ©dito y pedile al cliente que lo guarde en la guantera del auto.</div></div>
+      <div class="help-step"><span class="help-num">!</span><div><strong>Acceso de emergencia</strong> â€” Si el vehÃ­culo entra a cualquier otro taller o servicio tÃ©cnico, el mecÃ¡nico puede escanear el QR y ver al instante: marca/modelo, datos del titular, fluidos recomendados e historial completo de trabajos previos.</div></div>
+      <div class="help-step"><span class="help-num">!</span><div><strong>Requisito</strong> â€” El servidor TallerOS debe estar corriendo para que el QR funcione. Si el taller tiene conexiÃ³n a internet fija, el QR funciona desde cualquier lugar.</div></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">🖼️ Cómo agregar el logo del taller</div>
+    <div class="card-title">ðŸ–¼ï¸ CÃ³mo agregar el logo del taller</div>
     <div class="help-section">
-      <div class="help-step"><span class="help-num">1</span><div>Preparar el archivo del logo en formato <strong>PNG o JPG</strong>. Se recomienda fondo transparente (PNG) y tamaño mínimo de 200x200 píxeles.</div></div>
+      <div class="help-step"><span class="help-num">1</span><div>Preparar el archivo del logo en formato <strong>PNG o JPG</strong>. Se recomienda fondo transparente (PNG) y tamaÃ±o mÃ­nimo de 200x200 pÃ­xeles.</div></div>
       <div class="help-step"><span class="help-num">2</span><div>Renombrar el archivo como exactamente: <strong>logo.png</strong></div></div>
       <div class="help-step"><span class="help-num">3</span><div>Copiarlo en la carpeta: <strong>C:\taller-os\public\img\</strong></div></div>
-      <div class="help-step"><span class="help-num">4</span><div>Recargar el navegador (F5) — el logo aparecerá automáticamente en el encabezado.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div>Recargar el navegador (F5) â€” el logo aparecerÃ¡ automÃ¡ticamente en el encabezado.</div></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">💾 Backup — Cómo respaldar los datos</div>
+    <div class="card-title">ðŸ’¾ Backup â€” CÃ³mo respaldar los datos</div>
     <div class="help-section">
       <div class="help-step"><span class="help-num">1</span><div>Los datos se guardan en la carpeta: <strong>C:\taller-os\data\db\</strong></div></div>
-      <div class="help-step"><span class="help-num">2</span><div>Para hacer un backup, copiá esa carpeta completa a un pendrive o disco externo.</div></div>
+      <div class="help-step"><span class="help-num">2</span><div>Para hacer un backup, copiÃ¡ esa carpeta completa a un pendrive o disco externo.</div></div>
       <div class="help-step"><span class="help-num">3</span><div>Se recomienda hacer backup al menos una vez por semana.</div></div>
-      <div class="help-step"><span class="help-num">4</span><div>Para restaurar, copiá la carpeta de vuelta a la misma ubicación.</div></div>
+      <div class="help-step"><span class="help-num">4</span><div>Para restaurar, copiÃ¡ la carpeta de vuelta a la misma ubicaciÃ³n.</div></div>
     </div>
   </div>
 </div>
@@ -576,18 +593,18 @@
 <!-- ===== ACERCA DE ===== -->
 <div class="view" id="view-acerca">
   <div class="page-title">Acerca <span>del Sistema</span></div>
-  <div class="page-sub">Información sobre TallerOS</div>
+  <div class="page-sub">InformaciÃ³n sobre TallerOS</div>
 
   <div class="card" style="text-align:center;padding:40px 24px;">
     <img id="about-logo" src="img/logo.png" alt="Logo del taller"
          style="max-height:100px;max-width:280px;object-fit:contain;margin:0 auto 24px;display:block;border-radius:10px;"
          onerror="this.style.display='none'">
     <div style="font-family:'Bebas Neue';font-size:48px;letter-spacing:4px;color:var(--accent);margin-bottom:4px;">TallerOS</div>
-    <div style="font-size:14px;color:var(--muted);margin-bottom:32px;letter-spacing:2px;text-transform:uppercase;">Sistema de Recepción de Vehículos</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:32px;letter-spacing:2px;text-transform:uppercase;">Sistema de RecepciÃ³n de VehÃ­culos</div>
     <div style="width:60px;height:2px;background:var(--accent);margin:0 auto 32px;"></div>
 
-    <div style="font-size:15px;color:var(--text);margin-bottom:8px;">Versión 1.0</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:32px;">Base de datos MongoDB · Servidor Node.js · Acceso local</div>
+    <div style="font-size:15px;color:var(--text);margin-bottom:8px;">VersiÃ³n 1.0</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:32px;">Base de datos MongoDB Â· Servidor Node.js Â· Acceso local</div>
 
     <div style="background:var(--surface2);border-radius:12px;padding:24px;max-width:480px;margin:0 auto 32px;">
       <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Desarrollado por</div>
@@ -596,29 +613,29 @@
          onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
         autoelectrolab.com
       </a>
-      <div style="font-size:13px;color:var(--muted);">Soluciones tecnológicas para talleres mecánicos</div>
+      <div style="font-size:13px;color:var(--muted);">Soluciones tecnolÃ³gicas para talleres mecÃ¡nicos</div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:500px;margin:0 auto;">
       <div style="background:var(--surface2);border-radius:10px;padding:16px;">
-        <div style="font-size:24px;margin-bottom:8px;">🗄️</div>
+        <div style="font-size:24px;margin-bottom:8px;">ðŸ—„ï¸</div>
         <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Base de Datos</div>
         <div style="font-size:11px;color:var(--muted);">MongoDB</div>
       </div>
       <div style="background:var(--surface2);border-radius:10px;padding:16px;">
-        <div style="font-size:24px;margin-bottom:8px;">⚙️</div>
+        <div style="font-size:24px;margin-bottom:8px;">âš™ï¸</div>
         <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Servidor</div>
         <div style="font-size:11px;color:var(--muted);">Node.js + Express</div>
       </div>
       <div style="background:var(--surface2);border-radius:10px;padding:16px;">
-        <div style="font-size:24px;margin-bottom:8px;">📱</div>
+        <div style="font-size:24px;margin-bottom:8px;">ðŸ“±</div>
         <div style="font-size:12px;font-weight:600;margin-bottom:4px;">QR Historial</div>
-        <div style="font-size:11px;color:var(--muted);">Acceso rápido</div>
+        <div style="font-size:11px;color:var(--muted);">Acceso rÃ¡pido</div>
       </div>
     </div>
 
     <div style="margin-top:32px;font-size:12px;color:var(--muted);">
-      Para soporte técnico visitá
+      Para soporte tÃ©cnico visitÃ¡
       <a href="https://autoelectrolab.com/" target="_blank" style="color:var(--accent);text-decoration:none;">autoelectrolab.com</a>
     </div>
   </div>
@@ -626,12 +643,12 @@
 
 </div><!-- end main-content -->
 
-<!-- MODAL: EDICIÓN DE FICHA -->
+<!-- MODAL: EDICIÃ“N DE FICHA -->
 <div id="modal-edicion-ficha" class="modal-overlay">
   <div class="modal" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-    <h2>✏️ Editar Ficha</h2>
+    <h2>âœï¸ Editar Ficha</h2>
     
-    <div class="card-title">🚗 DATOS DEL VEHÍCULO</div>
+    <div class="card-title">ðŸš— DATOS DEL VEHÃCULO</div>
     <div class="grid-3">
       <div class="field">
         <label>Patente</label>
@@ -652,7 +669,7 @@
         <input type="text" id="edit-modelo">
       </div>
       <div class="field">
-        <label>Año</label>
+        <label>AÃ±o</label>
         <input type="number" id="edit-anio">
       </div>
       <div class="field">
@@ -661,14 +678,14 @@
       </div>
     </div>
 
-    <div class="card-title">👤 CLIENTE</div>
+    <div class="card-title">ðŸ‘¤ CLIENTE</div>
     <div class="grid-2">
       <div class="field">
         <label>Titular</label>
         <input type="text" id="edit-titular" placeholder="Nombre">
       </div>
       <div class="field">
-        <label>Teléfono</label>
+        <label>TelÃ©fono</label>
         <input type="text" id="edit-telefono">
       </div>
     </div>
@@ -677,7 +694,7 @@
       <input type="email" id="edit-email">
     </div>
 
-    <div class="card-title">📊 RECEPCIÓN</div>
+    <div class="card-title">ðŸ“Š RECEPCIÃ“N</div>
     <div class="grid-3">
       <div class="field">
         <label>KM Inicial</label>
@@ -703,7 +720,7 @@
       </div>
     </div>
 
-    <div class="card-title">💧 FLUIDOS</div>
+    <div class="card-title">ðŸ’§ FLUIDOS</div>
     <div class="grid-3">
       <div class="field">
         <label>Aceite</label>
@@ -719,7 +736,7 @@
       </div>
     </div>
 
-    <div class="card-title">🔧 ACCESORIOS</div>
+    <div class="card-title">ðŸ”§ ACCESORIOS</div>
     <div class="checklist" id="edit-accesorios-list">
       <div class="check-item" onclick="toggleCheck(this)">
         <div class="check-box"></div>
@@ -743,7 +760,7 @@
       </div>
       <div class="check-item" onclick="toggleCheck(this)">
         <div class="check-box"></div>
-        <span class="check-label" data-accesorio="Botiquín">Botiquín</span>
+        <span class="check-label" data-accesorio="BotiquÃ­n">BotiquÃ­n</span>
       </div>
     </div>
     <div class="field" style="margin-top: 14px;">
@@ -751,7 +768,7 @@
       <input type="text" id="edit-otros_accesorios">
     </div>
 
-    <div class="card-title">📋 ESTADO GENERAL</div>
+    <div class="card-title">ðŸ“‹ ESTADO GENERAL</div>
     <div class="field">
       <label>Estado General</label>
       <select id="edit-estado_general">
@@ -777,15 +794,15 @@
   </div>
 </div>
 
-<!-- Modal historial vehículo -->
+<!-- Modal historial vehÃ­culo -->
 <div class="modal-overlay" id="modal-hist">
   <div class="modal">
     <h2 id="mh-title">Historial</h2>
     <div id="mh-content"></div>
     <div class="btn-row" style="margin-top:16px;">
       <button class="btn btn-ghost" onclick="closeModal('modal-hist')">Cerrar</button>
-      <button class="btn btn-secondary" id="btn-qr" onclick="mostrarQR()">📱 Ver QR</button>
-      <button class="btn btn-primary" onclick="exportarHistorial()">📄 Exportar PDF</button>
+      <button class="btn btn-secondary" id="btn-qr" onclick="mostrarQR()">ðŸ“± Ver QR</button>
+      <button class="btn btn-primary" onclick="exportarHistorial()">ðŸ“„ Exportar PDF</button>
     </div>
   </div>
 </div>
@@ -793,13 +810,13 @@
 <!-- Modal QR -->
 <div class="modal-overlay" id="modal-qr">
   <div class="modal" style="max-width:360px;text-align:center;">
-    <h2>Código QR del Vehículo</h2>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Imprimilo y colocalo en la guantera. Cualquier mecánico podrá escanear y ver el historial completo.</p>
+    <h2>CÃ³digo QR del VehÃ­culo</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Imprimilo y colocalo en la guantera. Cualquier mecÃ¡nico podrÃ¡ escanear y ver el historial completo.</p>
     <div id="qr-container" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
     <div id="qr-url" style="font-family:'DM Mono';font-size:11px;color:var(--muted);word-break:break-all;margin-bottom:16px;"></div>
     <div class="btn-row" style="justify-content:center;">
       <button class="btn btn-ghost" onclick="closeModal('modal-qr')">Cerrar</button>
-      <button class="btn btn-primary" onclick="imprimirQR()">🖨️ Imprimir QR</button>
+      <button class="btn btn-primary" onclick="imprimirQR()">ðŸ–¨ï¸ Imprimir QR</button>
     </div>
   </div>
 </div>
@@ -816,7 +833,7 @@
       <div class="field">
         <label>Hora *</label>
         <select id="t-hora">
-          <option value="">— Seleccionar —</option>
+          <option value="">â€” Seleccionar â€”</option>
           <option>07:00</option><option>07:30</option><option>08:00</option><option>08:30</option>
           <option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option>
           <option>11:00</option><option>11:30</option><option>12:00</option><option>12:30</option>
@@ -834,16 +851,16 @@
         <input type="text" id="t-titular" placeholder="Nombre del cliente">
       </div>
       <div class="field">
-        <label>Teléfono</label>
+        <label>TelÃ©fono</label>
         <input type="tel" id="t-telefono" placeholder="11-1234-5678">
       </div>
       <div class="field">
-        <label>Mecánico asignado</label>
-        <input type="text" id="t-mecanico" placeholder="Nombre del mecánico">
+        <label>MecÃ¡nico asignado</label>
+        <input type="text" id="t-mecanico" placeholder="Nombre del mecÃ¡nico">
       </div>
       <div class="field g2">
         <label>Trabajo solicitado *</label>
-        <textarea id="t-trabajo" placeholder="Describí brevemente qué trae el vehículo..." style="min-height:60px;"></textarea>
+        <textarea id="t-trabajo" placeholder="DescribÃ­ brevemente quÃ© trae el vehÃ­culo..." style="min-height:60px;"></textarea>
       </div>
       <div class="field">
         <label>Estado</label>
@@ -861,7 +878,7 @@
     </div>
     <div class="btn-row" style="margin-top:16px;">
       <button class="btn btn-ghost" onclick="closeModal('modal-turno')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarTurno()">💾 Guardar Turno</button>
+      <button class="btn btn-primary" onclick="guardarTurno()">ðŸ’¾ Guardar Turno</button>
     </div>
     <input type="hidden" id="t-id">
   </div>
@@ -873,9 +890,9 @@
 const API = 'http://localhost:3000/api';
 let vehiculoCurrent = null;
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  TOKENS Y AUTENTICACIÓN
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  TOKENS Y AUTENTICACIÃ“N
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function getToken() { return localStorage.getItem('talleros-token'); }
 function setToken(token) { localStorage.setItem('talleros-token', token); }
 function removeToken() { localStorage.removeItem('talleros-token'); localStorage.removeItem('talleros-user'); }
@@ -887,7 +904,7 @@ async function hacerLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
-  if (!email || !password) { errorEl.textContent = 'Email y contraseña requeridos'; return; }
+  if (!email || !password) { errorEl.textContent = 'Email y contraseÃ±a requeridos'; return; }
   try {
     const response = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
     const data = await response.json();
@@ -925,14 +942,14 @@ function ocultarApp() {
   document.getElementById('main-content').style.display = 'none';
 }
 
-// ── Estado ítems ──────────────────────────────────
+// â”€â”€ Estado Ã­tems â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ITEMS = [
   'Tablero','Filtro aire','Cinturones','Tuercas seguridad + adapt.',
-  'Espejos','Batería','Pastillas y Frenos','Estéreo',
-  'Función A/A','Catalizador','Parabrisas','Caño de escape',
-  'Limpiaparabrisas','Mangueras','Vidrios','Motor depósito agua',
+  'Espejos','BaterÃ­a','Pastillas y Frenos','EstÃ©reo',
+  'FunciÃ³n A/A','Catalizador','Parabrisas','CaÃ±o de escape',
+  'Limpiaparabrisas','Mangueras','Vidrios','Motor depÃ³sito agua',
   'Luces altas','Butacas delanteras','Luces bajas','Butacas traseras',
-  'Luces posición','Cubrealfombras','Luces de giro','Alarma',
+  'Luces posiciÃ³n','Cubrealfombras','Luces de giro','Alarma',
   'Balizas','Cerraduras','Luces retroceso','Airbags',
   'Llantas delanteras','Llantas traseras','Tapa tanque','Mecanismo apertura'
 ];
@@ -958,7 +975,145 @@ function selEstado(btn) {
 }
 function toggleCheck(el) { el.classList.toggle('checked'); }
 
-// ── Conexión al servidor ───────────────────────────
+// â”€â”€ ConexiÃ³n al servidor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// OPERARIOS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+let operarioEditando = null;
+
+async function abrirOperarios() {
+  document.getElementById('modal-operarios').classList.add('open');
+  cargarOperarios();
+  limpiarFormOperario();
+}
+
+function cerrarOperarios() {
+  document.getElementById('modal-operarios').classList.remove('open');
+  limpiarFormOperario();
+}
+
+async function cargarOperarios() {
+  try {
+    const response = await fetch('/api/operarios', { headers: getHeaders() });
+    if (!response.ok) return;
+    const operarios = await response.json();
+    
+    const lista = document.getElementById('operarios-lista');
+    if (!operarios.length) {
+      lista.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--muted);">Sin operarios</td></tr>';
+      return;
+    }
+    
+    lista.innerHTML = operarios.map(op => 
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>
+          <button class="btn btn-secondary" onclick="editarOperario('')" style="padding: 4px 8px; font-size: 11px;">Editar</button>
+          <button class="btn btn-secondary" onclick="eliminarOperario('')" style="padding: 4px 8px; font-size: 11px;">Eliminar</button>
+        </td>
+      </tr>
+    ).join('');
+  } catch (e) {
+    console.error('Error cargando operarios:', e);
+  }
+}
+
+async function editarOperario(id) {
+  try {
+    const response = await fetch(/api/operarios/\, { headers: getHeaders() });
+    if (!response.ok) return;
+    const op = await response.json();
+    
+    document.getElementById('op-nombre').value = op.nombre;
+    document.getElementById('op-email').value = op.email;
+    document.getElementById('op-telefono').value = op.telefono || '';
+    document.getElementById('op-rol').value = op.rol;
+    document.getElementById('op-especialidades').value = (op.especialidades || []).join(', ');
+    document.getElementById('op-disponibilidad').value = op.disponibilidad || '';
+    document.getElementById('op-activo').checked = op.activo !== false;
+    
+    operarioEditando = id;
+  } catch (e) {
+    toast('Error cargando operario', 'err');
+  }
+}
+
+async function guardarOperario() {
+  const nombre = document.getElementById('op-nombre').value.trim();
+  const email = document.getElementById('op-email').value.trim();
+  const rol = document.getElementById('op-rol').value;
+  
+  if (!nombre || !email) {
+    toast('Nombre y email requeridos', 'err');
+    return;
+  }
+  
+  const datos = {
+    nombre,
+    email,
+    telefono: document.getElementById('op-telefono').value,
+    rol,
+    especialidades: document.getElementById('op-especialidades').value.split(',').map(e => e.trim()).filter(e => e),
+    disponibilidad: document.getElementById('op-disponibilidad').value,
+    activo: document.getElementById('op-activo').checked
+  };
+  
+  try {
+    const url = operarioEditando ? /api/operarios/\ : '/api/operarios';
+    const method = operarioEditando ? 'PUT' : 'POST';
+    
+    const response = await fetch(url, {
+      method,
+      headers: getHeaders(),
+      body: JSON.stringify(datos)
+    });
+    
+    if (response.ok) {
+      toast(operarioEditando ? 'Operario actualizado' : 'Operario creado', 'ok');
+      limpiarFormOperario();
+      cargarOperarios();
+    } else {
+      toast('Error al guardar', 'err');
+    }
+  } catch (e) {
+    toast('Error: ' + e.message, 'err');
+  }
+}
+
+async function eliminarOperario(id) {
+  if (!confirm('Eliminar este operario?')) return;
+  
+  try {
+    const response = await fetch(/api/operarios/\, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    
+    if (response.ok) {
+      toast('Operario eliminado', 'ok');
+      cargarOperarios();
+    }
+  } catch (e) {
+    toast('Error al eliminar', 'err');
+  }
+}
+
+function limpiarFormOperario() {
+  document.getElementById('op-nombre').value = '';
+  document.getElementById('op-email').value = '';
+  document.getElementById('op-telefono').value = '';
+  document.getElementById('op-rol').value = 'tecnico_especialista';
+  document.getElementById('op-especialidades').value = '';
+  document.getElementById('op-disponibilidad').value = '';
+  document.getElementById('op-activo').checked = true;
+  operarioEditando = null;
+}
+
+
 async function checkConn() {
   try {
     const r = await fetch(API + '/dashboard', { headers: getHeaders(), signal: AbortSignal.timeout(3000) });
@@ -969,14 +1124,14 @@ async function checkConn() {
     }
   } catch(e) {}
   document.getElementById('conn-dot').classList.remove('online');
-  document.getElementById('conn-label').textContent = 'Sin conexión al servidor';
+  document.getElementById('conn-label').textContent = 'Sin conexiÃ³n al servidor';
   return false;
 }
 
-// ── Guardar ficha ─────────────────────────────────
+// â”€â”€ Guardar ficha â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function guardarFicha() {
   const dominio = document.getElementById('dominio').value.trim().toUpperCase();
-  if (!dominio) { toast('⚠️ El campo Patente es obligatorio', 'err'); return; }
+  if (!dominio) { toast('âš ï¸ El campo Patente es obligatorio', 'err'); return; }
 
   const accesorios = [...document.querySelectorAll('.check-item.checked .check-label')].map(e => e.textContent);
   const estado_items = [];
@@ -994,7 +1149,7 @@ async function guardarFicha() {
   if (document.getElementById('aceite').value)
     servicios_data.push({ tipo:'cambio_aceite', descripcion: 'Cambio aceite y filtro: ' + document.getElementById('aceite').value });
   if (document.getElementById('bujias').value)
-    servicios_data.push({ tipo:'cambio_bujias', descripcion: 'Cambio bujías: ' + document.getElementById('bujias').value });
+    servicios_data.push({ tipo:'cambio_bujias', descripcion: 'Cambio bujÃ­as: ' + document.getElementById('bujias').value });
   if (document.getElementById('arreglos_mecanicos').value)
     servicios_data.push({ tipo:'mecanico', descripcion: document.getElementById('arreglos_mecanicos').value });
   if (document.getElementById('arreglos_electricos').value)
@@ -1024,7 +1179,7 @@ async function guardarFicha() {
       medida_refrigerante: document.getElementById('medida_refrigerante').value,
       accesorios,
       otros_accesorios: document.getElementById('otros_accesorios').value,
-      estado_general:   document.querySelector('#estado-general .sel')?.textContent.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ]/g,'').trim() || '',
+      estado_general:   document.querySelector('#estado-general .sel')?.textContent.replace(/[^a-zA-ZÃ¡Ã©Ã­Ã³ÃºÃÃ‰ÃÃ“Ãš]/g,'').trim() || '',
       obs_visuales:     document.getElementById('obs_visuales').value,
       obs_adicionales:  document.getElementById('obs_adicionales').value,
       turno:            document.getElementById('turno').value,
@@ -1049,12 +1204,12 @@ async function guardarFicha() {
     const data = await r.json();
     if (!r.ok) throw new Error(data.error);
 
-    toast('✅ Ficha guardada en MongoDB correctamente');
+    toast('âœ… Ficha guardada en MongoDB correctamente');
     limpiarForm();
     // Si hay QR, ofrecer verlo
     if (data.qr) {
       setTimeout(() => {
-        if (confirm(`✅ Ficha guardada.\n\n¿Querés ver el código QR para el vehículo ${dominio}?`)) {
+        if (confirm(`âœ… Ficha guardada.\n\nÂ¿QuerÃ©s ver el cÃ³digo QR para el vehÃ­culo ${dominio}?`)) {
           vehiculoCurrent = { dominio, qr: data.qr };
           document.getElementById('qr-container').innerHTML = data.qr;
           document.getElementById('qr-url').textContent = `http://localhost:3000/historial-publico/${dominio}`;
@@ -1063,14 +1218,14 @@ async function guardarFicha() {
       }, 300);
     }
   } catch(e) {
-    toast('❌ Error: ' + e.message, 'err');
+    toast('âŒ Error: ' + e.message, 'err');
   } finally {
-    btn.innerHTML = '💾 Guardar en BD';
+    btn.innerHTML = 'ðŸ’¾ Guardar en BD';
     btn.disabled = false;
   }
 }
 
-// ── Buscar vehículo ────────────────────────────────
+// â”€â”€ Buscar vehÃ­culo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let buscarTimer = null;
 async function buscarVehiculo(q) {
   clearTimeout(buscarTimer);
@@ -1081,7 +1236,7 @@ async function buscarVehiculo(q) {
       const r = await fetch(API + '/vehiculos/buscar/' + encodeURIComponent(q), { headers: getHeaders() });
       const vehiculos = await r.json();
       if (!vehiculos.length) {
-        res.innerHTML = `<div style="color:var(--muted);text-align:center;padding:40px;">No se encontraron vehículos.</div>`;
+        res.innerHTML = `<div style="color:var(--muted);text-align:center;padding:40px;">No se encontraron vehÃ­culos.</div>`;
         return;
       }
       res.innerHTML = vehiculos.map(v => `
@@ -1089,9 +1244,9 @@ async function buscarVehiculo(q) {
           <div class="vehiculo-patente">${v.dominio}</div>
           <div class="vehiculo-info">
             <div class="vehiculo-marca">${v.marca || ''} ${v.modelo || ''} ${v.anio ? '('+v.anio+')' : ''}</div>
-            <div class="vehiculo-titular">Titular: ${v.titular_id?.nombre || '—'}</div>
+            <div class="vehiculo-titular">Titular: ${v.titular_id?.nombre || 'â€”'}</div>
           </div>
-          <div class="vehiculo-badge">Ver historial →</div>
+          <div class="vehiculo-badge">Ver historial â†’</div>
         </div>`).join('');
     } catch(e) {
       res.innerHTML = `<div style="color:var(--bad);text-align:center;padding:24px;">Error al conectar con el servidor.</div>`;
@@ -1099,7 +1254,7 @@ async function buscarVehiculo(q) {
   }, 300);
 }
 
-// ── Ver historial ─────────────────────────────────
+// â”€â”€ Ver historial â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function verHistorial(dominio) {
   try {
     const r = await fetch(API + '/historial/' + dominio, { headers: getHeaders() });
@@ -1109,29 +1264,29 @@ async function verHistorial(dominio) {
     const { vehiculo, historial } = data;
     vehiculoCurrent = vehiculo;
 
-    document.getElementById('mh-title').textContent = `Historial — ${dominio}`;
+    document.getElementById('mh-title').textContent = `Historial â€” ${dominio}`;
 
     let html = `<div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:18px;">
       <div style="font-family:'Bebas Neue';font-size:20px;color:var(--accent);">${vehiculo.marca||''} ${vehiculo.modelo||''} ${vehiculo.anio||''}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted);margin-top:8px;">
-        <div>Titular: <span style="color:var(--text)">${vehiculo.titular_id?.nombre||'—'}</span></div>
-        <div>Combustible: <span style="color:var(--text)">${vehiculo.combustible||'—'}</span></div>
-        <div>Chasis: <span style="color:var(--text);font-family:'DM Mono';font-size:10px;">${vehiculo.chasis||'—'}</span></div>
-        <div>Motor: <span style="color:var(--text);font-family:'DM Mono';font-size:10px;">${vehiculo.motor||'—'}</span></div>
+        <div>Titular: <span style="color:var(--text)">${vehiculo.titular_id?.nombre||'â€”'}</span></div>
+        <div>Combustible: <span style="color:var(--text)">${vehiculo.combustible||'â€”'}</span></div>
+        <div>Chasis: <span style="color:var(--text);font-family:'DM Mono';font-size:10px;">${vehiculo.chasis||'â€”'}</span></div>
+        <div>Motor: <span style="color:var(--text);font-family:'DM Mono';font-size:10px;">${vehiculo.motor||'â€”'}</span></div>
       </div>
     </div>
-    <div style="font-family:'Bebas Neue';font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:12px;">LÍNEA DE TIEMPO — ${historial.length} VISITA${historial.length!==1?'S':''}</div>
+    <div style="font-family:'Bebas Neue';font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:12px;">LÃNEA DE TIEMPO â€” ${historial.length} VISITA${historial.length!==1?'S':''}</div>
     <div class="timeline">`;
 
     historial.forEach(({ ficha, servicios }) => {
       const tags = servicios.map(s => `<span class="tl-tag">${s.descripcion.substring(0,40)}</span>`).join('');
       html += `<div class="tl-item"><div class="tl-dot"></div><div class="tl-card">
-        <div class="tl-date">${new Date(ficha.fecha_ingreso).toLocaleDateString('es-AR')} · ${ficha.turno||'—'}</div>
-        ${ficha.km_inicial ? `<div class="tl-km">⬤ ${parseInt(ficha.km_inicial).toLocaleString()} km</div>` : ''}
+        <div class="tl-date">${new Date(ficha.fecha_ingreso).toLocaleDateString('es-AR')} Â· ${ficha.turno||'â€”'}</div>
+        ${ficha.km_inicial ? `<div class="tl-km">â¬¤ ${parseInt(ficha.km_inicial).toLocaleString()} km</div>` : ''}
         <div class="tl-tags">${tags}</div>
         ${ficha.obs_adicionales ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">${ficha.obs_adicionales}</div>` : ''}
         <div style="margin-top:12px;text-align:right;">
-          <button class="btn btn-ghost" style="padding:4px 12px;font-size:10px;" onclick="abrirEditorFicha('${ficha._id}')">✏️ Editar</button>
+          <button class="btn btn-ghost" style="padding:4px 12px;font-size:10px;" onclick="abrirEditorFicha('${ficha._id}')">âœï¸ Editar</button>
         </div>
       </div></div>`;
     });
@@ -1140,11 +1295,11 @@ async function verHistorial(dominio) {
     document.getElementById('mh-content').innerHTML = html;
     document.getElementById('modal-hist').classList.add('open');
   } catch(e) {
-    toast('❌ Error al cargar historial: ' + e.message, 'err');
+    toast('âŒ Error al cargar historial: ' + e.message, 'err');
   }
 }
 
-// ── QR ─────────────────────────────────────────────
+// â”€â”€ QR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function mostrarQR() {
   if (!vehiculoCurrent) return;
   closeModal('modal-hist');
@@ -1164,14 +1319,14 @@ function imprimirQR() {
     svg{max-width:220px;}</style></head><body>
     <div class="patente">${dominio}</div>
     <div style="margin:16px auto;display:inline-block;">${qrHtml}</div>
-    <div class="info">Escaneá para ver el historial completo del vehículo</div>
+    <div class="info">EscaneÃ¡ para ver el historial completo del vehÃ­culo</div>
     <div class="info" style="font-size:10px;color:#aaa;margin-top:4px;">Guardalo en la guantera</div>
     </body></html>`);
   win.document.close();
   setTimeout(() => win.print(), 400);
 }
 
-// ── Exportar historial PDF ───────────────────────────
+// â”€â”€ Exportar historial PDF â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function exportarHistorial() {
   if (!vehiculoCurrent) return;
   const dominio = vehiculoCurrent.dominio;
@@ -1181,16 +1336,16 @@ async function exportarHistorial() {
   const win = window.open('','_blank');
   const rows = historial.map(({ ficha, servicios }) => `
     <tr><td>${new Date(ficha.fecha_ingreso).toLocaleDateString('es-AR')}</td>
-    <td>${ficha.km_inicial ? parseInt(ficha.km_inicial).toLocaleString()+' km' : '—'}</td>
-    <td>${servicios.map(s=>s.descripcion).join('; ') || '—'}</td>
-    <td>${ficha.turno||'—'}</td>
+    <td>${ficha.km_inicial ? parseInt(ficha.km_inicial).toLocaleString()+' km' : 'â€”'}</td>
+    <td>${servicios.map(s=>s.descripcion).join('; ') || 'â€”'}</td>
+    <td>${ficha.turno||'â€”'}</td>
     </tr>`).join('');
 
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Historial ${dominio}</title>
     <style>body{font-family:Arial;font-size:13px;padding:24px;} h1{font-size:20px;} h2{background:#f0f0f0;padding:6px;border-left:4px solid #ff6b1a;font-size:14px;margin:14px 0 8px;} table{width:100%;border-collapse:collapse;} td,th{border:1px solid #ddd;padding:6px 9px;font-size:12px;} th{background:#f5f5f5;}</style>
     </head><body>
-    <h1>📋 Historial del Vehículo — ${dominio}</h1>
-    <p>${vehiculo.marca||''} ${vehiculo.modelo||''} ${vehiculo.anio||''} | Titular: ${vehiculo.titular_id?.nombre||'—'}</p>
+    <h1>ðŸ“‹ Historial del VehÃ­culo â€” ${dominio}</h1>
+    <p>${vehiculo.marca||''} ${vehiculo.modelo||''} ${vehiculo.anio||''} | Titular: ${vehiculo.titular_id?.nombre||'â€”'}</p>
     <h2>SERVICIOS REGISTRADOS (${historial.length})</h2>
     <table><tr><th>Fecha</th><th>Kilometraje</th><th>Trabajos</th><th>Turno</th></tr>${rows}</table>
     </body></html>`);
@@ -1198,7 +1353,7 @@ async function exportarHistorial() {
   setTimeout(()=>win.print(),400);
 }
 
-// ── Dashboard ──────────────────────────────────────
+// â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadDashboard() {
   try {
     const r = await fetch(API + '/dashboard', { headers: getHeaders() });
@@ -1219,29 +1374,29 @@ async function loadDashboard() {
           <div style="font-family:'Bebas Neue';font-size:18px;color:var(--accent);width:50px;">${t.hora}</div>
           <div style="flex:1;">
             <div style="font-size:13px;font-weight:600;">${t.trabajo}</div>
-            <div style="font-size:11px;color:var(--muted);">${t.dominio||''} ${t.titular?'· '+t.titular:''}</div>
+            <div style="font-size:11px;color:var(--muted);">${t.dominio||''} ${t.titular?'Â· '+t.titular:''}</div>
           </div>
-          <span class="turno-estado estado-${t.estado}" style="font-size:10px;">${{pendiente:'●',confirmado:'◆',atendido:'✓',cancelado:'✕'}[t.estado]}</span>
+          <span class="turno-estado estado-${t.estado}" style="font-size:10px;">${{pendiente:'â—',confirmado:'â—†',atendido:'âœ“',cancelado:'âœ•'}[t.estado]}</span>
         </div>`).join('');
     }
 
-    // Últimas fichas
+    // Ãšltimas fichas
     const ul = document.getElementById('ultimas-fichas');
-    if (!d.ultimas?.length) { ul.innerHTML = `<div style="color:var(--muted);padding:12px 0;font-size:13px;">Sin fichas aún.</div>`; return; }
+    if (!d.ultimas?.length) { ul.innerHTML = `<div style="color:var(--muted);padding:12px 0;font-size:13px;">Sin fichas aÃºn.</div>`; return; }
     ul.innerHTML = d.ultimas.map(f => `
       <div class="vehiculo-card" style="padding:12px;" onclick="showView('historial');document.getElementById('search-patente').value='${f.dominio}';buscarVehiculo('${f.dominio}')">
         <div class="vehiculo-patente" style="font-size:16px;">${f.dominio}</div>
         <div class="vehiculo-info">
           <div class="vehiculo-marca" style="font-size:13px;">${f.dominio}</div>
-          <div class="vehiculo-titular">${new Date(f.fecha_ingreso).toLocaleDateString('es-AR')} · ${f.turno||'Sin turno'}</div>
+          <div class="vehiculo-titular">${new Date(f.fecha_ingreso).toLocaleDateString('es-AR')} Â· ${f.turno||'Sin turno'}</div>
         </div>
       </div>`).join('');
   } catch(e) {
-    document.getElementById('ultimas-fichas').innerHTML = `<div style="color:var(--bad);padding:12px;font-size:13px;">Error al cargar. ¿Está corriendo el servidor?</div>`;
+    document.getElementById('ultimas-fichas').innerHTML = `<div style="color:var(--bad);padding:12px;font-size:13px;">Error al cargar. Â¿EstÃ¡ corriendo el servidor?</div>`;
   }
 }
 
-// ── Utilidades ────────────────────────────────────
+// â”€â”€ Utilidades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showView(name) {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
@@ -1261,7 +1416,7 @@ function limpiarForm() {
   document.getElementById('preview-proximo-service').style.display = 'none';
 }
 
-// ── Preview próximo service ────────────────────────
+// â”€â”€ Preview prÃ³ximo service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('change', function(e) {
   if (e.target.id === 'meses_intervalo') {
     const meses = parseInt(e.target.value);
@@ -1275,9 +1430,9 @@ document.addEventListener('change', function(e) {
   }
 });
 
-// ════════════════════════════════════════════════
-//  EDICIÓN DE FICHAS
-// ════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  EDICIÃ“N DE FICHAS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function cargarAccesoriosEdit(accesorios) {
   const items = document.querySelectorAll('#edit-accesorios-list .check-item');
@@ -1298,7 +1453,7 @@ async function abrirEditorFicha(fichaId) {
   const data = await response.json();
   const { ficha, servicios, estadoItems, vehiculo, cliente } = data;
   
-  // Llenar campos del vehículo
+  // Llenar campos del vehÃ­culo
   document.getElementById('edit-dominio').value = ficha.dominio || '';
   document.getElementById('edit-tipo_vehiculo').value = vehiculo?.tipo_vehiculo || '';
   document.getElementById('edit-marca').value = vehiculo?.marca || '';
@@ -1311,7 +1466,7 @@ async function abrirEditorFicha(fichaId) {
   document.getElementById('edit-telefono').value = cliente?.telefono || '';
   document.getElementById('edit-email').value = cliente?.email || '';
   
-  // Recepción
+  // RecepciÃ³n
   document.getElementById('edit-km_inicial').value = ficha.km_inicial || '';
   document.getElementById('edit-km_final').value = ficha.km_final || '';
   document.getElementById('edit-vtv').value = ficha.vtv || '';
@@ -1331,7 +1486,7 @@ async function abrirEditorFicha(fichaId) {
     if (ficha.accesorios.rueda_auxilio) accesoriosList.push('Rueda auxilio');
     if (ficha.accesorios.crique) accesoriosList.push('Crique');
     if (ficha.accesorios.herramientas) accesoriosList.push('Herramientas');
-    if (ficha.accesorios.botiquin) accesoriosList.push('Botiquín');
+    if (ficha.accesorios.botiquin) accesoriosList.push('BotiquÃ­n');
   }
   cargarAccesoriosEdit(accesoriosList);
   document.getElementById('edit-otros_accesorios').value = ficha.accesorios?.otros || '';
@@ -1393,10 +1548,10 @@ async function guardarEdicionFicha() {
   });
 
   if (response.ok) {
-    toast('Ficha actualizada ✅', 'ok');
+    toast('Ficha actualizada âœ…', 'ok');
     document.getElementById('modal-edicion-ficha').classList.remove('open');
     window.fichaEditando = null;
-    // Recargar el historial si está abierto
+    // Recargar el historial si estÃ¡ abierto
     if (document.getElementById('modal-hist').classList.contains('open')) {
       const dominioActual = document.getElementById('edit-dominio').value;
       verHistorial(dominioActual);
@@ -1412,9 +1567,9 @@ function cerrarEdicionFicha() {
   window.fichaEditando = null;
 }
 
-// ════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  ALERTAS DE SERVICE
-// ════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let todasAlertas = [];
 
 async function loadAlertas() {
@@ -1432,7 +1587,7 @@ async function loadAlertas() {
       badge.style.display = 'none';
     }
   } catch(e) {
-    cont.innerHTML = `<div style="color:var(--bad);text-align:center;padding:32px;">Error al cargar alertas. Verificá que el servidor esté corriendo.</div>`;
+    cont.innerHTML = `<div style="color:var(--bad);text-align:center;padding:32px;">Error al cargar alertas. VerificÃ¡ que el servidor estÃ© corriendo.</div>`;
   }
 }
 
@@ -1440,34 +1595,34 @@ function renderAlertas(alertas) {
   const cont = document.getElementById('lista-alertas');
   if (!alertas.length) {
     cont.innerHTML = `<div style="text-align:center;padding:48px;">
-      <div style="font-size:48px;margin-bottom:12px;">✅</div>
+      <div style="font-size:48px;margin-bottom:12px;">âœ…</div>
       <div style="font-weight:600;font-size:16px;margin-bottom:4px;">Sin alertas pendientes</div>
-      <div style="color:var(--muted);font-size:13px;">Todos los vehículos están al día con el service.</div>
+      <div style="color:var(--muted);font-size:13px;">Todos los vehÃ­culos estÃ¡n al dÃ­a con el service.</div>
     </div>`;
     return;
   }
   cont.innerHTML = alertas.map(a => {
     const v = a.vehiculo_id;
     const c = a.cliente_id;
-    const fechaProx = a.fecha_proximo ? new Date(a.fecha_proximo).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' }) : '—';
+    const fechaProx = a.fecha_proximo ? new Date(a.fecha_proximo).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' }) : 'â€”';
     const diasText = a.fecha_proximo ? (() => {
       const dias = Math.floor((new Date(a.fecha_proximo) - new Date()) / (1000*60*60*24));
-      if (dias < 0) return `Venció hace ${Math.abs(dias)} días`;
+      if (dias < 0) return `VenciÃ³ hace ${Math.abs(dias)} dÃ­as`;
       if (dias === 0) return 'Vence hoy';
-      return `Vence en ${dias} días`;
+      return `Vence en ${dias} dÃ­as`;
     })() : '';
-    const badgeText = { vencido:'VENCIDO', proximo_30:'PRÓX. 30 DÍAS', proximo_60:'PRÓX. 60 DÍAS' }[a.estado];
+    const badgeText = { vencido:'VENCIDO', proximo_30:'PRÃ“X. 30 DÃAS', proximo_60:'PRÃ“X. 60 DÃAS' }[a.estado];
 
     return `<div class="alerta-card ${a.estado}" onclick="verHistorial('${a.dominio}')">
       <div class="vehiculo-patente" style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--accent);background:rgba(255,107,26,.1);padding:5px 12px;border-radius:6px;flex-shrink:0;">${a.dominio}</div>
       <div style="flex:1;">
         <div style="font-weight:600;font-size:14px;">${v?.marca||''} ${v?.modelo||''} ${v?.anio?'('+v.anio+')':''}</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">
-          ${c?.nombre ? `👤 ${c.nombre}` : ''}
-          ${c?.telefono ? ` · 📞 ${c.telefono}` : ''}
+          ${c?.nombre ? `ðŸ‘¤ ${c.nombre}` : ''}
+          ${c?.telefono ? ` Â· ðŸ“ž ${c.telefono}` : ''}
         </div>
-        <div style="font-size:12px;margin-top:4px;">📅 Próximo: <strong>${fechaProx}</strong> — ${diasText}</div>
-        ${a.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">📝 ${a.nota}</div>` : ''}
+        <div style="font-size:12px;margin-top:4px;">ðŸ“… PrÃ³ximo: <strong>${fechaProx}</strong> â€” ${diasText}</div>
+        ${a.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">ðŸ“ ${a.nota}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
         <span class="alerta-badge">${badgeText}</span>
@@ -1489,12 +1644,12 @@ function abrirTurnoDesdeAlerta(dominio, titular, telefono) {
   document.getElementById('t-dominio').value   = dominio;
   document.getElementById('t-titular').value   = titular;
   document.getElementById('t-telefono').value  = telefono;
-  document.getElementById('t-trabajo').value   = 'Service periódico';
+  document.getElementById('t-trabajo').value   = 'Service periÃ³dico';
 }
 
-// ════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  TURNOS
-// ════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let semanaActual = new Date();
 let turnoEditandoId = null;
 
@@ -1530,7 +1685,7 @@ function getLunesDe(fecha) {
 
 async function renderSemana() {
   const lunes = getLunesDe(semanaActual);
-  const dias  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const dias  = ['Lun','Mar','MiÃ©','Jue','Vie','SÃ¡b','Dom'];
   const hoyStr = new Date().toISOString().split('T')[0];
 
   // Fetch turnos de la semana
@@ -1566,7 +1721,7 @@ async function renderSemana() {
     div.className = 'dia-col' + (esHoy ? ' hoy' : '');
     div.onclick = () => { semanaActual = new Date(str+'T12:00:00'); document.getElementById('turnos-fecha').value = str; cargarTurnosDia(semanaActual); };
     div.innerHTML = turnosDia.map(t =>
-      `<div class="turno-chip ${t.estado}" title="${t.hora} — ${t.titular||t.dominio||''}: ${t.trabajo}" onclick="event.stopPropagation();editarTurno('${t._id}')">${t.hora} ${t.dominio||t.titular||''}</div>`
+      `<div class="turno-chip ${t.estado}" title="${t.hora} â€” ${t.titular||t.dominio||''}: ${t.trabajo}" onclick="event.stopPropagation();editarTurno('${t._id}')">${t.hora} ${t.dominio||t.titular||''}</div>`
     ).join('') + `<div style="font-size:11px;color:var(--border);margin-top:4px;text-align:center;cursor:pointer;" onclick="event.stopPropagation();abrirModalTurnoFecha('${str}')">+ turno</div>`;
     body.appendChild(div);
   }
@@ -1583,7 +1738,7 @@ async function cargarTurnosDia(fecha) {
     const r = await fetch(API + '/turnos/dia/' + str, { headers: getHeaders() });
     const turnos = await r.json();
     if (!turnos.length) {
-      cont.innerHTML = `<div style="color:var(--muted);text-align:center;padding:28px;background:var(--surface);border-radius:10px;">Sin turnos para este día.<br><br><button class="btn btn-primary" onclick="abrirModalTurnoFecha('${str}')">+ Agregar turno</button></div>`;
+      cont.innerHTML = `<div style="color:var(--muted);text-align:center;padding:28px;background:var(--surface);border-radius:10px;">Sin turnos para este dÃ­a.<br><br><button class="btn btn-primary" onclick="abrirModalTurnoFecha('${str}')">+ Agregar turno</button></div>`;
       return;
     }
     cont.innerHTML = turnos.map(t => `
@@ -1592,17 +1747,17 @@ async function cargarTurnosDia(fecha) {
         <div class="turno-info">
           <div class="turno-titulo">${t.trabajo}</div>
           <div class="turno-sub">
-            ${t.dominio ? `🚗 ${t.dominio}` : ''}
-            ${t.titular ? ` · 👤 ${t.titular}` : ''}
-            ${t.telefono ? ` · 📞 ${t.telefono}` : ''}
-            ${t.mecanico ? ` · 🔧 ${t.mecanico}` : ''}
+            ${t.dominio ? `ðŸš— ${t.dominio}` : ''}
+            ${t.titular ? ` Â· ðŸ‘¤ ${t.titular}` : ''}
+            ${t.telefono ? ` Â· ðŸ“ž ${t.telefono}` : ''}
+            ${t.mecanico ? ` Â· ðŸ”§ ${t.mecanico}` : ''}
           </div>
-          ${t.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;">📝 ${t.nota}</div>` : ''}
+          ${t.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;">ðŸ“ ${t.nota}</div>` : ''}
         </div>
         <span class="turno-estado estado-${t.estado}">${{pendiente:'Pendiente',confirmado:'Confirmado',atendido:'Atendido',cancelado:'Cancelado'}[t.estado]}</span>
         <div style="display:flex;flex-direction:column;gap:6px;margin-left:8px;">
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="editarTurno('${t._id}')">✏️</button>
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--bad);border-color:var(--bad);" onclick="eliminarTurno('${t._id}','${str}')">🗑</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="editarTurno('${t._id}')">âœï¸</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--bad);border-color:var(--bad);" onclick="eliminarTurno('${t._id}','${str}')">ðŸ—‘</button>
         </div>
       </div>`).join('');
   } catch(e) {
@@ -1654,7 +1809,7 @@ async function guardarTurno() {
   const trabajo = document.getElementById('t-trabajo').value.trim();
   const fecha   = document.getElementById('t-fecha').value;
   if (!hora || !titular || !trabajo || !fecha) {
-    toast('⚠️ Completá fecha, hora, cliente y trabajo', 'err'); return;
+    toast('âš ï¸ CompletÃ¡ fecha, hora, cliente y trabajo', 'err'); return;
   }
   const payload = {
     fecha:    new Date(fecha + 'T12:00:00'),
@@ -1672,14 +1827,14 @@ async function guardarTurno() {
     const r = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
     if (!r.ok) throw new Error((await r.json()).error);
     closeModal('modal-turno');
-    toast('✅ Turno guardado');
+    toast('âœ… Turno guardado');
     renderSemana();
     cargarTurnosDia(fecha);
   } catch(e) { toast('Error: ' + e.message, 'err'); }
 }
 
 async function eliminarTurno(id, fechaStr) {
-  if (!confirm('¿Eliminar este turno?')) return;
+  if (!confirm('Â¿Eliminar este turno?')) return;
   try {
     await fetch(API + '/turnos/' + id, { method: 'DELETE', headers: getHeaders() });
     toast('Turno eliminado');
@@ -1713,40 +1868,40 @@ function generarPDF() {
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ficha ${dominio}</title>
     <style>body{font-family:Arial;font-size:12px;padding:22px;} h1{font-size:18px;} h2{background:#f0f0f0;padding:5px 9px;border-left:4px solid #ff6b1a;font-size:13px;margin:14px 0 8px;} .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;} .field label{font-size:10px;color:#888;text-transform:uppercase;display:block;} .field span{font-weight:600;} .footer{margin-top:36px;border-top:1px solid #ccc;padding-top:14px;display:flex;justify-content:space-between;} .firma{border-bottom:1px solid #333;width:180px;height:38px;}</style>
     </head><body>
-    <h1>🔧 Ficha de Recepción — ${dominio}</h1>
-    <p style="color:#888;font-size:11px;">Fecha: ${document.getElementById('fecha_ingreso').value} · Turno: ${document.getElementById('turno').value||'—'}</p>
-    <h2>VEHÍCULO</h2>
+    <h1>ðŸ”§ Ficha de RecepciÃ³n â€” ${dominio}</h1>
+    <p style="color:#888;font-size:11px;">Fecha: ${document.getElementById('fecha_ingreso').value} Â· Turno: ${document.getElementById('turno').value||'â€”'}</p>
+    <h2>VEHÃCULO</h2>
     <div class="grid">
-      <div class="field"><label>Marca y Modelo</label><span>${document.getElementById('marca_modelo').value||'—'}</span></div>
-      <div class="field"><label>Año</label><span>${document.getElementById('anio').value||'—'}</span></div>
+      <div class="field"><label>Marca y Modelo</label><span>${document.getElementById('marca_modelo').value||'â€”'}</span></div>
+      <div class="field"><label>AÃ±o</label><span>${document.getElementById('anio').value||'â€”'}</span></div>
       <div class="field"><label>Dominio</label><span>${dominio}</span></div>
-      <div class="field"><label>Combustible</label><span>${document.getElementById('combustible').value||'—'}</span></div>
-      <div class="field"><label>Chasis</label><span>${document.getElementById('chasis').value||'—'}</span></div>
-      <div class="field"><label>Motor</label><span>${document.getElementById('motor').value||'—'}</span></div>
-      <div class="field"><label>KM Inicial</label><span>${document.getElementById('km_inicial').value||'—'}</span></div>
-      <div class="field"><label>VTV</label><span>${document.getElementById('vtv').value||'—'}</span></div>
+      <div class="field"><label>Combustible</label><span>${document.getElementById('combustible').value||'â€”'}</span></div>
+      <div class="field"><label>Chasis</label><span>${document.getElementById('chasis').value||'â€”'}</span></div>
+      <div class="field"><label>Motor</label><span>${document.getElementById('motor').value||'â€”'}</span></div>
+      <div class="field"><label>KM Inicial</label><span>${document.getElementById('km_inicial').value||'â€”'}</span></div>
+      <div class="field"><label>VTV</label><span>${document.getElementById('vtv').value||'â€”'}</span></div>
     </div>
     <h2>CLIENTE</h2>
     <div class="grid">
-      <div class="field"><label>Titular</label><span>${document.getElementById('titular').value||'—'}</span></div>
-      <div class="field"><label>Teléfono</label><span>${document.getElementById('telefono').value||'—'}</span></div>
+      <div class="field"><label>Titular</label><span>${document.getElementById('titular').value||'â€”'}</span></div>
+      <div class="field"><label>TelÃ©fono</label><span>${document.getElementById('telefono').value||'â€”'}</span></div>
     </div>
     <h2>TRABAJOS</h2>
-    <p><strong>Aceite:</strong> ${document.getElementById('aceite').value||'—'}<br>
-    <strong>Bujías:</strong> ${document.getElementById('bujias').value||'—'}<br>
-    <strong>Mecánica:</strong> ${document.getElementById('arreglos_mecanicos').value||'—'}<br>
-    <strong>Eléctrico:</strong> ${document.getElementById('arreglos_electricos').value||'—'}</p>
+    <p><strong>Aceite:</strong> ${document.getElementById('aceite').value||'â€”'}<br>
+    <strong>BujÃ­as:</strong> ${document.getElementById('bujias').value||'â€”'}<br>
+    <strong>MecÃ¡nica:</strong> ${document.getElementById('arreglos_mecanicos').value||'â€”'}<br>
+    <strong>ElÃ©ctrico:</strong> ${document.getElementById('arreglos_electricos').value||'â€”'}</p>
     <h2>OBSERVACIONES</h2>
-    <p>${document.getElementById('obs_visuales').value||'—'}</p>
+    <p>${document.getElementById('obs_visuales').value||'â€”'}</p>
     <div class="footer">
-      <div><div class="firma"></div><div style="font-size:10px;margin-top:4px;">Firma y aclaración del cliente</div></div>
+      <div><div class="firma"></div><div style="font-size:10px;margin-top:4px;">Firma y aclaraciÃ³n del cliente</div></div>
       <div><div class="firma"></div><div style="font-size:10px;margin-top:4px;">Responsable del taller</div></div>
     </div></body></html>`);
   win.document.close();
   setTimeout(()=>win.print(),400);
 }
 
-// ── Init ──────────────────────────────────────────
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.addEventListener('load', () => { const t = getToken(); if (t) mostrarApp(); else ocultarApp(); });
 document.getElementById('login-password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') hacerLogin(); });
 buildEstadoGrid();
