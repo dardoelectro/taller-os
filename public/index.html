@@ -190,6 +190,46 @@
   .help-step > div { font-size: 14px; line-height: 1.6; color: var(--text); }
   .help-step strong { color: var(--accent); }
 
+  /* LOGIN STYLES */
+  .login-container {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-container.active { display: flex; }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+  .login-logo { font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 8px; }
+  .login-sub { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 32px; }
+  .login-field { margin-bottom: 16px; text-align: left; }
+  .login-field label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+  .login-field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans'; font-size: 14px; padding: 11px 14px; outline: none; transition: border-color .2s; }
+  .login-field input:focus { border-color: var(--accent); }
+  .login-btn { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-family: 'DM Sans'; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px; }
+  .login-btn:hover { background: #ff8040; }
+  .login-error { color: var(--bad); font-size: 12px; margin-top: 12px; }
+  
+  /* User avatar */
+  .user-info { display: flex; align-items: center; gap: 12px; background: var(--surface2); padding: 4px 12px 4px 6px; border-radius: 32px; border: 1px solid var(--border); }
+  .user-avatar { width: 32px; height: 32px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; text-transform: uppercase; }
+  .user-name { font-size: 13px; font-weight: 500; margin-right: 4px; }
+  .logout-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px; border-radius: 20px; transition: all .2s; }
+  .logout-btn:hover { color: var(--bad); background: rgba(239,68,68,0.1); }
+  
+  #main-header { display: flex; }
+  #main-content { display: block; }
+
   @media (max-width:700px) {
     .grid-2,.grid-3 { grid-template-columns: 1fr; }
     .g2,.g3 { grid-column: span 1; }
@@ -200,9 +240,28 @@
 </style>
 </head>
 <body>
-<header>
+
+<!-- PANTALLA DE LOGIN -->
+<div id="login-screen" class="login-container">
+  <div class="login-box">
+    <div class="login-logo">🔧 TallerOS</div>
+    <div class="login-sub">Acceso al sistema</div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@taller.com" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-password" placeholder="••••••">
+    </div>
+    <button class="login-btn" onclick="hacerLogin()">Iniciar sesión</button>
+    <div id="login-error" class="login-error"></div>
+  </div>
+</div>
+
+<!-- CABECERA PRINCIPAL (oculto hasta login) -->
+<header id="main-header" style="display:none;">
   <div style="display:flex;align-items:center;gap:12px;">
-    <!-- Logo del taller: si existe img/logo.png se muestra, sino muestra icono texto -->
     <img id="taller-logo" src="img/logo.png" alt="Logo"
          style="height:44px;width:auto;border-radius:8px;object-fit:contain;display:none;"
          onload="this.style.display='block';document.getElementById('logo-fallback').style.display='none';"
@@ -221,13 +280,18 @@
     <button onclick="showView('ayuda')">Ayuda</button>
     <button onclick="showView('acerca')">Acerca de</button>
   </nav>
-  <div style="display:flex;align-items:center;">
-    <span class="conn-dot" id="conn-dot"></span>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="conn-dot" id="conn-dot"></div>
     <span id="conn-label">Conectando...</span>
+    <div class="user-info">
+      <div class="user-avatar" id="user-avatar">U</div>
+      <span class="user-name" id="user-name">Usuario</span>
+      <button class="logout-btn" onclick="hacerLogout()" title="Cerrar sesión">🚪</button>
+    </div>
   </div>
 </header>
 
-<div class="main">
+<div id="main-content" class="main" style="display:none;">
 
 <!-- ===== NUEVA FICHA ===== -->
 <div class="view active" id="view-nueva">
@@ -560,7 +624,158 @@
   </div>
 </div>
 
-</div><!-- end main -->
+</div><!-- end main-content -->
+
+<!-- MODAL: EDICIÓN DE FICHA -->
+<div id="modal-edicion-ficha" class="modal-overlay">
+  <div class="modal" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+    <h2>✏️ Editar Ficha</h2>
+    
+    <div class="card-title">🚗 DATOS DEL VEHÍCULO</div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Patente</label>
+        <input type="text" id="edit-dominio" readonly style="background: var(--surface2);">
+      </div>
+      <div class="field">
+        <label>Tipo</label>
+        <input type="text" id="edit-tipo_vehiculo" placeholder="Auto, Camioneta...">
+      </div>
+      <div class="field">
+        <label>Marca</label>
+        <input type="text" id="edit-marca">
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Modelo</label>
+        <input type="text" id="edit-modelo">
+      </div>
+      <div class="field">
+        <label>Año</label>
+        <input type="number" id="edit-anio">
+      </div>
+      <div class="field">
+        <label>Color</label>
+        <input type="text" id="edit-color">
+      </div>
+    </div>
+
+    <div class="card-title">👤 CLIENTE</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Titular</label>
+        <input type="text" id="edit-titular" placeholder="Nombre">
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="text" id="edit-telefono">
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="edit-email">
+    </div>
+
+    <div class="card-title">📊 RECEPCIÓN</div>
+    <div class="grid-3">
+      <div class="field">
+        <label>KM Inicial</label>
+        <input type="number" id="edit-km_inicial">
+      </div>
+      <div class="field">
+        <label>KM Final</label>
+        <input type="number" id="edit-km_final">
+      </div>
+      <div class="field">
+        <label>VTV</label>
+        <input type="text" id="edit-vtv">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Responsable</label>
+        <input type="text" id="edit-responsable">
+      </div>
+      <div class="field">
+        <label>Turno</label>
+        <input type="text" id="edit-turno">
+      </div>
+    </div>
+
+    <div class="card-title">💧 FLUIDOS</div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Aceite</label>
+        <input type="text" id="edit-medida_aceite" placeholder="Lleno, 3/4...">
+      </div>
+      <div class="field">
+        <label>Frenos</label>
+        <input type="text" id="edit-medida_frenos">
+      </div>
+      <div class="field">
+        <label>Refrigerante</label>
+        <input type="text" id="edit-medida_refrigerante">
+      </div>
+    </div>
+
+    <div class="card-title">🔧 ACCESORIOS</div>
+    <div class="checklist" id="edit-accesorios-list">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="check-label" data-accesorio="Baliza emergencia">Baliza emergencia</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="check-label" data-accesorio="Extintor">Extintor</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="check-label" data-accesorio="Rueda auxilio">Rueda auxilio</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="check-label" data-accesorio="Crique">Crique</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="check-label" data-accesorio="Herramientas">Herramientas</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="check-label" data-accesorio="Botiquín">Botiquín</span>
+      </div>
+    </div>
+    <div class="field" style="margin-top: 14px;">
+      <label>Otros accesorios</label>
+      <input type="text" id="edit-otros_accesorios">
+    </div>
+
+    <div class="card-title">📋 ESTADO GENERAL</div>
+    <div class="field">
+      <label>Estado General</label>
+      <select id="edit-estado_general">
+        <option value="">Seleccionar...</option>
+        <option value="Bueno">Bueno</option>
+        <option value="Regular">Regular</option>
+        <option value="Malo">Malo</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Observaciones Visuales</label>
+      <textarea id="edit-obs_visuales"></textarea>
+    </div>
+    <div class="field">
+      <label>Observaciones Adicionales</label>
+      <textarea id="edit-obs_adicionales"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="cerrarEdicionFicha()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionFicha()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal historial vehículo -->
 <div class="modal-overlay" id="modal-hist">
@@ -658,6 +873,58 @@
 const API = 'http://localhost:3000/api';
 let vehiculoCurrent = null;
 
+// ═══════════════════════════════════════════════════════════════════════════════
+//  TOKENS Y AUTENTICACIÓN
+// ═══════════════════════════════════════════════════════════════════════════════
+function getToken() { return localStorage.getItem('talleros-token'); }
+function setToken(token) { localStorage.setItem('talleros-token', token); }
+function removeToken() { localStorage.removeItem('talleros-token'); localStorage.removeItem('talleros-user'); }
+function setUser(user) { localStorage.setItem('talleros-user', JSON.stringify(user)); }
+function getUser() { const u = localStorage.getItem('talleros-user'); return u ? JSON.parse(u) : null; }
+function getHeaders() { const t = getToken(); return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` }; }
+
+async function hacerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+  if (!email || !password) { errorEl.textContent = 'Email y contraseña requeridos'; return; }
+  try {
+    const response = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    const data = await response.json();
+    if (!response.ok) { errorEl.textContent = data.error || 'Error'; return; }
+    setToken(data.token);
+    setUser(data.usuario);
+    mostrarApp();
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+    errorEl.textContent = '';
+  } catch (e) { errorEl.textContent = 'Error: ' + e.message; }
+}
+
+function hacerLogout() {
+  removeToken();
+  ocultarApp();
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-error').textContent = '';
+}
+
+function mostrarApp() {
+  const t = getToken(), u = getUser();
+  if (!t || !u) { ocultarApp(); return; }
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('main-header').style.display = 'flex';
+  document.getElementById('main-content').style.display = 'block';
+  document.getElementById('user-name').textContent = u.nombre;
+  document.getElementById('user-avatar').textContent = u.nombre.charAt(0).toUpperCase();
+}
+
+function ocultarApp() {
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('main-header').style.display = 'none';
+  document.getElementById('main-content').style.display = 'none';
+}
+
 // ── Estado ítems ──────────────────────────────────
 const ITEMS = [
   'Tablero','Filtro aire','Cinturones','Tuercas seguridad + adapt.',
@@ -694,7 +961,7 @@ function toggleCheck(el) { el.classList.toggle('checked'); }
 // ── Conexión al servidor ───────────────────────────
 async function checkConn() {
   try {
-    const r = await fetch(API + '/dashboard', { signal: AbortSignal.timeout(3000) });
+    const r = await fetch(API + '/dashboard', { headers: getHeaders(), signal: AbortSignal.timeout(3000) });
     if (r.ok) {
       document.getElementById('conn-dot').classList.add('online');
       document.getElementById('conn-label').textContent = 'Base de datos conectada';
@@ -776,7 +1043,7 @@ async function guardarFicha() {
 
   try {
     const r = await fetch(API + '/fichas', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: getHeaders(),
       body: JSON.stringify(payload)
     });
     const data = await r.json();
@@ -811,7 +1078,7 @@ async function buscarVehiculo(q) {
   if (q.length < 2) { res.innerHTML = ''; return; }
   buscarTimer = setTimeout(async () => {
     try {
-      const r = await fetch(API + '/vehiculos/buscar/' + encodeURIComponent(q));
+      const r = await fetch(API + '/vehiculos/buscar/' + encodeURIComponent(q), { headers: getHeaders() });
       const vehiculos = await r.json();
       if (!vehiculos.length) {
         res.innerHTML = `<div style="color:var(--muted);text-align:center;padding:40px;">No se encontraron vehículos.</div>`;
@@ -835,7 +1102,7 @@ async function buscarVehiculo(q) {
 // ── Ver historial ─────────────────────────────────
 async function verHistorial(dominio) {
   try {
-    const r = await fetch(API + '/historial/' + dominio);
+    const r = await fetch(API + '/historial/' + dominio, { headers: getHeaders() });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error);
 
@@ -863,6 +1130,9 @@ async function verHistorial(dominio) {
         ${ficha.km_inicial ? `<div class="tl-km">⬤ ${parseInt(ficha.km_inicial).toLocaleString()} km</div>` : ''}
         <div class="tl-tags">${tags}</div>
         ${ficha.obs_adicionales ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">${ficha.obs_adicionales}</div>` : ''}
+        <div style="margin-top:12px;text-align:right;">
+          <button class="btn btn-ghost" style="padding:4px 12px;font-size:10px;" onclick="abrirEditorFicha('${ficha._id}')">✏️ Editar</button>
+        </div>
       </div></div>`;
     });
 
@@ -905,7 +1175,7 @@ function imprimirQR() {
 async function exportarHistorial() {
   if (!vehiculoCurrent) return;
   const dominio = vehiculoCurrent.dominio;
-  const r = await fetch(API + '/historial/' + dominio);
+  const r = await fetch(API + '/historial/' + dominio, { headers: getHeaders() });
   const { vehiculo, historial } = await r.json();
 
   const win = window.open('','_blank');
@@ -913,7 +1183,8 @@ async function exportarHistorial() {
     <tr><td>${new Date(ficha.fecha_ingreso).toLocaleDateString('es-AR')}</td>
     <td>${ficha.km_inicial ? parseInt(ficha.km_inicial).toLocaleString()+' km' : '—'}</td>
     <td>${servicios.map(s=>s.descripcion).join('; ') || '—'}</td>
-    <td>${ficha.turno||'—'}</td></tr>`).join('');
+    <td>${ficha.turno||'—'}</td>
+    </tr>`).join('');
 
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Historial ${dominio}</title>
     <style>body{font-family:Arial;font-size:13px;padding:24px;} h1{font-size:20px;} h2{background:#f0f0f0;padding:6px;border-left:4px solid #ff6b1a;font-size:14px;margin:14px 0 8px;} table{width:100%;border-collapse:collapse;} td,th{border:1px solid #ddd;padding:6px 9px;font-size:12px;} th{background:#f5f5f5;}</style>
@@ -930,7 +1201,7 @@ async function exportarHistorial() {
 // ── Dashboard ──────────────────────────────────────
 async function loadDashboard() {
   try {
-    const r = await fetch(API + '/dashboard');
+    const r = await fetch(API + '/dashboard', { headers: getHeaders() });
     const d = await r.json();
     document.getElementById('s-fichas').textContent    = d.total_fichas;
     document.getElementById('s-vehiculos').textContent = d.total_vehiculos;
@@ -1005,6 +1276,143 @@ document.addEventListener('change', function(e) {
 });
 
 // ════════════════════════════════════════════════
+//  EDICIÓN DE FICHAS
+// ════════════════════════════════════════════════
+
+function cargarAccesoriosEdit(accesorios) {
+  const items = document.querySelectorAll('#edit-accesorios-list .check-item');
+  items.forEach(item => {
+    const labelSpan = item.querySelector('.check-label');
+    const nombre = labelSpan.getAttribute('data-accesorio') || labelSpan.textContent;
+    if (accesorios && accesorios.includes(nombre)) {
+      item.classList.add('checked');
+    } else {
+      item.classList.remove('checked');
+    }
+  });
+}
+
+async function abrirEditorFicha(fichaId) {
+  const response = await fetch(`/api/fichas/${fichaId}`, { headers: getHeaders() });
+  if (!response.ok) { toast('Error al cargar ficha', 'err'); return; }
+  const data = await response.json();
+  const { ficha, servicios, estadoItems, vehiculo, cliente } = data;
+  
+  // Llenar campos del vehículo
+  document.getElementById('edit-dominio').value = ficha.dominio || '';
+  document.getElementById('edit-tipo_vehiculo').value = vehiculo?.tipo_vehiculo || '';
+  document.getElementById('edit-marca').value = vehiculo?.marca || '';
+  document.getElementById('edit-modelo').value = vehiculo?.modelo || '';
+  document.getElementById('edit-anio').value = vehiculo?.anio || '';
+  document.getElementById('edit-color').value = vehiculo?.color || '';
+  
+  // Cliente
+  document.getElementById('edit-titular').value = cliente?.nombre || '';
+  document.getElementById('edit-telefono').value = cliente?.telefono || '';
+  document.getElementById('edit-email').value = cliente?.email || '';
+  
+  // Recepción
+  document.getElementById('edit-km_inicial').value = ficha.km_inicial || '';
+  document.getElementById('edit-km_final').value = ficha.km_final || '';
+  document.getElementById('edit-vtv').value = ficha.vtv || '';
+  document.getElementById('edit-responsable').value = ficha.responsable || '';
+  document.getElementById('edit-turno').value = ficha.turno || '';
+  
+  // Fluidos
+  document.getElementById('edit-medida_aceite').value = ficha.fluidos?.aceite || '';
+  document.getElementById('edit-medida_frenos').value = ficha.fluidos?.frenos || '';
+  document.getElementById('edit-medida_refrigerante').value = ficha.fluidos?.refrigerante || '';
+  
+  // Accesorios
+  const accesoriosList = [];
+  if (ficha.accesorios) {
+    if (ficha.accesorios.baliza) accesoriosList.push('Baliza emergencia');
+    if (ficha.accesorios.extintor) accesoriosList.push('Extintor');
+    if (ficha.accesorios.rueda_auxilio) accesoriosList.push('Rueda auxilio');
+    if (ficha.accesorios.crique) accesoriosList.push('Crique');
+    if (ficha.accesorios.herramientas) accesoriosList.push('Herramientas');
+    if (ficha.accesorios.botiquin) accesoriosList.push('Botiquín');
+  }
+  cargarAccesoriosEdit(accesoriosList);
+  document.getElementById('edit-otros_accesorios').value = ficha.accesorios?.otros || '';
+  
+  // Estado general
+  document.getElementById('edit-estado_general').value = ficha.estado_general || '';
+  document.getElementById('edit-obs_visuales').value = ficha.obs_visuales || '';
+  document.getElementById('edit-obs_adicionales').value = ficha.obs_adicionales || '';
+  
+  window.fichaEditando = fichaId;
+  document.getElementById('modal-edicion-ficha').classList.add('open');
+}
+
+async function guardarEdicionFicha() {
+  const fichaId = window.fichaEditando;
+  if (!fichaId) { toast('Error: no hay ficha', 'err'); return; }
+  
+  // Obtener accesorios marcados
+  const accesoriosMarcados = [];
+  document.querySelectorAll('#edit-accesorios-list .check-item.checked .check-label').forEach(label => {
+    accesoriosMarcados.push(label.textContent.trim());
+  });
+  
+  const datos = {
+    ficha_data: {
+      dominio: document.getElementById('edit-dominio').value.toUpperCase(),
+      km_inicial: document.getElementById('edit-km_inicial').value,
+      km_final: document.getElementById('edit-km_final').value,
+      vtv: document.getElementById('edit-vtv').value,
+      responsable: document.getElementById('edit-responsable').value,
+      turno: document.getElementById('edit-turno').value,
+      medida_aceite: document.getElementById('edit-medida_aceite').value,
+      medida_frenos: document.getElementById('edit-medida_frenos').value,
+      medida_refrigerante: document.getElementById('edit-medida_refrigerante').value,
+      estado_general: document.getElementById('edit-estado_general').value,
+      obs_visuales: document.getElementById('edit-obs_visuales').value,
+      obs_adicionales: document.getElementById('edit-obs_adicionales').value,
+      accesorios: accesoriosMarcados,
+      otros_accesorios: document.getElementById('edit-otros_accesorios').value,
+    },
+    vehiculo_data: {
+      tipo_vehiculo: document.getElementById('edit-tipo_vehiculo').value,
+      marca: document.getElementById('edit-marca').value,
+      modelo: document.getElementById('edit-modelo').value,
+      anio: document.getElementById('edit-anio').value,
+      color: document.getElementById('edit-color').value,
+    },
+    cliente_data: {
+      nombre: document.getElementById('edit-titular').value,
+      telefono: document.getElementById('edit-telefono').value,
+      email: document.getElementById('edit-email').value,
+    }
+  };
+
+  const response = await fetch(`/api/fichas/${fichaId}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(datos)
+  });
+
+  if (response.ok) {
+    toast('Ficha actualizada ✅', 'ok');
+    document.getElementById('modal-edicion-ficha').classList.remove('open');
+    window.fichaEditando = null;
+    // Recargar el historial si está abierto
+    if (document.getElementById('modal-hist').classList.contains('open')) {
+      const dominioActual = document.getElementById('edit-dominio').value;
+      verHistorial(dominioActual);
+    }
+  } else {
+    const err = await response.json();
+    toast('Error al actualizar: ' + (err.error || 'desconocido'), 'err');
+  }
+}
+
+function cerrarEdicionFicha() {
+  document.getElementById('modal-edicion-ficha').classList.remove('open');
+  window.fichaEditando = null;
+}
+
+// ════════════════════════════════════════════════
 //  ALERTAS DE SERVICE
 // ════════════════════════════════════════════════
 let todasAlertas = [];
@@ -1012,7 +1420,7 @@ let todasAlertas = [];
 async function loadAlertas() {
   const cont = document.getElementById('lista-alertas');
   try {
-    const r = await fetch(API + '/alertas');
+    const r = await fetch(API + '/alertas', { headers: getHeaders() });
     todasAlertas = await r.json();
     renderAlertas(todasAlertas);
     // Actualizar badge en nav
@@ -1129,7 +1537,7 @@ async function renderSemana() {
   const fechaStr = lunes.toISOString().split('T')[0];
   let turnos = [];
   try {
-    const r = await fetch(API + '/turnos/semana/' + fechaStr);
+    const r = await fetch(API + '/turnos/semana/' + fechaStr, { headers: getHeaders() });
     turnos = await r.json();
   } catch(e) {}
 
@@ -1172,7 +1580,7 @@ async function cargarTurnosDia(fecha) {
   tit.textContent = esHoy ? 'TURNOS DE HOY' : 'TURNOS DEL ' + new Date(str+'T12:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long'}).toUpperCase();
 
   try {
-    const r = await fetch(API + '/turnos/dia/' + str);
+    const r = await fetch(API + '/turnos/dia/' + str, { headers: getHeaders() });
     const turnos = await r.json();
     if (!turnos.length) {
       cont.innerHTML = `<div style="color:var(--muted);text-align:center;padding:28px;background:var(--surface);border-radius:10px;">Sin turnos para este día.<br><br><button class="btn btn-primary" onclick="abrirModalTurnoFecha('${str}')">+ Agregar turno</button></div>`;
@@ -1220,7 +1628,7 @@ function abrirModalTurnoFecha(fechaStr) {
 async function editarTurno(id) {
   try {
     // Buscar el turno en la lista cargada
-    const r = await fetch(API + '/turnos/dia/' + (document.getElementById('turnos-fecha').value || new Date().toISOString().split('T')[0]));
+    const r = await fetch(API + '/turnos/dia/' + (document.getElementById('turnos-fecha').value || new Date().toISOString().split('T')[0]), { headers: getHeaders() });
     const turnos = await r.json();
     const t = turnos.find(x => x._id === id);
     if (!t) return;
@@ -1261,7 +1669,7 @@ async function guardarTurno() {
     const id = document.getElementById('t-id').value;
     const url    = id ? API + '/turnos/' + id : API + '/turnos';
     const method = id ? 'PUT' : 'POST';
-    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const r = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
     if (!r.ok) throw new Error((await r.json()).error);
     closeModal('modal-turno');
     toast('✅ Turno guardado');
@@ -1273,7 +1681,7 @@ async function guardarTurno() {
 async function eliminarTurno(id, fechaStr) {
   if (!confirm('¿Eliminar este turno?')) return;
   try {
-    await fetch(API + '/turnos/' + id, { method:'DELETE' });
+    await fetch(API + '/turnos/' + id, { method: 'DELETE', headers: getHeaders() });
     toast('Turno eliminado');
     renderSemana();
     cargarTurnosDia(fechaStr);
@@ -1283,7 +1691,7 @@ async function eliminarTurno(id, fechaStr) {
 async function autocompletarTurno(dominio) {
   if (dominio.length < 5) return;
   try {
-    const r = await fetch(API + '/vehiculos/' + dominio);
+    const r = await fetch(API + '/vehiculos/' + dominio, { headers: getHeaders() });
     if (!r.ok) return;
     const v = await r.json();
     if (v.titular_id?.nombre && !document.getElementById('t-titular').value)
@@ -1339,11 +1747,12 @@ function generarPDF() {
 }
 
 // ── Init ──────────────────────────────────────────
+window.addEventListener('load', () => { const t = getToken(); if (t) mostrarApp(); else ocultarApp(); });
+document.getElementById('login-password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') hacerLogin(); });
 buildEstadoGrid();
 document.getElementById('fecha_ingreso').value = new Date().toISOString().split('T')[0];
 checkConn();
 setInterval(checkConn, 15000);
-// Cargar badge de alertas al inicio
 setTimeout(loadAlertas, 1500);
 </script>
 </body>

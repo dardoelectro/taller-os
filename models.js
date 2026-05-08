@@ -229,6 +229,28 @@ const FotoSchema = new mongoose.Schema({
 });
 
 // ─────────────────────────────────────────────
+// 8. USUARIOS (Nuevo)
+// ─────────────────────────────────────────────
+const UsuarioSchema = new mongoose.Schema({
+  nombre:       { type: String, required: true, trim: true },
+  email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password:     { type: String, required: true },
+  rol:          { 
+    type: String, 
+    enum: ['admin', 'mecanico'], 
+    default: 'mecanico' 
+  },
+  activo:       { type: Boolean, default: true },
+  creado_en:    { type: Date, default: Date.now },
+  actualizado:  { type: Date, default: Date.now },
+});
+
+UsuarioSchema.pre('save', function(next) {
+  this.actualizado = new Date();
+  next();
+});
+
+// ─────────────────────────────────────────────
 // EXPORTAR
 // ─────────────────────────────────────────────
 module.exports = {
@@ -241,4 +263,5 @@ module.exports = {
   Turno:          mongoose.model('Turno',          TurnoSchema),
   Presupuesto:    mongoose.model('Presupuesto',    PresupuestoSchema),
   Foto:           mongoose.model('Foto',           FotoSchema),
+  Usuario:        mongoose.model('Usuario',        UsuarioSchema),
 };

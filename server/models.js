@@ -227,6 +227,28 @@ const TurnoSchema = new mongoose.Schema({
 });
 
 // ─────────────────────────────────────────────
+// 8. USUARIOS
+// ─────────────────────────────────────────────
+const UsuarioSchema = new mongoose.Schema({
+  nombre:       { type: String, required: true, trim: true },
+  email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password:     { type: String, required: true },
+  rol:          { 
+    type: String, 
+    enum: ['admin', 'mecanico'], 
+    default: 'mecanico' 
+  },
+  activo:       { type: Boolean, default: true },
+  creado_en:    { type: Date, default: Date.now },
+  actualizado:  { type: Date, default: Date.now },
+});
+
+UsuarioSchema.pre('save', function(next) {
+  this.actualizado = new Date();
+  next();
+});
+
+// ─────────────────────────────────────────────
 // EXPORTAR MODELOS
 // ─────────────────────────────────────────────
 module.exports = {
@@ -237,4 +259,5 @@ module.exports = {
   EstadoItem:      mongoose.model('EstadoItem',      EstadoItemSchema),
   ProximoService:  mongoose.model('ProximoService',  ProximoServiceSchema),
   Turno:           mongoose.model('Turno',           TurnoSchema),
+  Usuario:         mongoose.model('Usuario',         UsuarioSchema),
 };

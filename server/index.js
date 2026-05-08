@@ -11,7 +11,10 @@ const cors      = require('cors');
 const path      = require('path');
 const QRCode    = require('qrcode');
 
-const { Cliente, Vehiculo, Ficha, Servicio, EstadoItem, ProximoService, Turno } = require('./models');
+const { Cliente, Vehiculo, Ficha, Servicio, EstadoItem, ProximoService, Turno, Usuario } = require('./models');
+const { verifyToken, verifyAdmin } = require('./auth');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -35,11 +38,106 @@ mongoose.connect(MONGO_URI)
   });
 
 // ════════════════════════════════════════════════════════════
+//  RUTAS: AUTENTICACIÓN
+// ════════════════════════════════════════════════════════════
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña requeridos' });
+    }
+
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) {
+      return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+    }
+
+    if (!usuario.activo) {
+      return res.status(401).json({ error: 'Usuario desactivado' });
+    }
+
+    const passwordValida = await bcrypt.compare(password, usuario.password);
+    if (!passwordValida) {
+      return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+    }
+
+    const token = jwt.sign(
+      { _id: usuario._id, email: usuario.email, nombre: usuario.nombre, rol: usuario.rol },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({ 
+      message: 'Login exitoso',
+      token,
+      usuario: { _id: usuario._id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol }
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Obtener usuario actual
+app.get('/api/auth/me', verifyToken, async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.user._id).select('-password');
+    res.json(usuario);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Registrar usuario (solo admin)
+app.post('/api/auth/register', verifyAdmin, async (req, res) => {
+  try {
+    const { nombre, email, password, rol } = req.body;
+
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: 'Campos requeridos: nombre, email, password' });
+    }
+
+    const usuarioExistente = await Usuario.findOne({ email });
+    if (usuarioExistente) {
+      return res.status(400).json({ error: 'Email ya registrado' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const usuario = await Usuario.create({
+      nombre,
+      email,
+      password: passwordHash,
+      rol: rol || 'mecanico',
+    });
+
+    res.json({ 
+      message: 'Usuario creado', 
+      usuario: { _id: usuario._id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol } 
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Listar usuarios (solo admin)
+app.get('/api/auth/usuarios', verifyAdmin, async (req, res) => {
+  try {
+    const usuarios = await Usuario.find().select('-password');
+    res.json(usuarios);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════
 //  RUTAS: VEHÍCULOS
 // ════════════════════════════════════════════════════════════
 
 // Buscar por patente (búsqueda parcial)
-app.get('/api/vehiculos/buscar/:patente', async (req, res) => {
+app.get('/api/vehiculos/buscar/:patente', verifyToken, async (req, res) => {
   try {
     const regex = new RegExp(req.params.patente, 'i');
     const vehiculos = await Vehiculo.find({ dominio: regex })
@@ -52,7 +150,7 @@ app.get('/api/vehiculos/buscar/:patente', async (req, res) => {
 });
 
 // Obtener vehículo por patente exacta (para el QR)
-app.get('/api/vehiculos/:dominio', async (req, res) => {
+app.get('/api/vehiculos/:dominio', verifyToken, async (req, res) => {
   try {
     const v = await Vehiculo.findOne({ dominio: req.params.dominio.toUpperCase() })
       .populate('titular_id');
@@ -64,7 +162,7 @@ app.get('/api/vehiculos/:dominio', async (req, res) => {
 });
 
 // Crear o actualizar vehículo
-app.post('/api/vehiculos', async (req, res) => {
+app.post('/api/vehiculos', verifyToken, async (req, res) => {
   try {
     const dominio = req.body.dominio?.toUpperCase();
     if (!dominio) return res.status(400).json({ error: 'Dominio requerido' });
@@ -95,7 +193,7 @@ app.post('/api/vehiculos', async (req, res) => {
 //  RUTAS: CLIENTES
 // ════════════════════════════════════════════════════════════
 
-app.get('/api/clientes/buscar/:nombre', async (req, res) => {
+app.get('/api/clientes/buscar/:nombre', verifyToken, async (req, res) => {
   try {
     const regex = new RegExp(req.params.nombre, 'i');
     const clientes = await Cliente.find({
@@ -107,7 +205,7 @@ app.get('/api/clientes/buscar/:nombre', async (req, res) => {
   }
 });
 
-app.post('/api/clientes', async (req, res) => {
+app.post('/api/clientes', verifyToken, async (req, res) => {
   try {
     const cliente = new Cliente(req.body);
     await cliente.save();
@@ -122,7 +220,7 @@ app.post('/api/clientes', async (req, res) => {
 // ════════════════════════════════════════════════════════════
 
 // Guardar ficha completa (recepción)
-app.post('/api/fichas', async (req, res) => {
+app.post('/api/fichas', verifyToken, async (req, res) => {
   try {
     const { ficha_data, servicios_data, estado_items } = req.body;
 
@@ -260,7 +358,7 @@ app.post('/api/fichas', async (req, res) => {
 });
 
 // Historial completo por patente
-app.get('/api/historial/:dominio', async (req, res) => {
+app.get('/api/historial/:dominio', verifyToken, async (req, res) => {
   try {
     const dominio = req.params.dominio.toUpperCase();
 
@@ -332,7 +430,7 @@ app.get('/historial-publico/:dominio', async (req, res) => {
 // ════════════════════════════════════════════════════════════
 //  RUTAS: DASHBOARD
 // ════════════════════════════════════════════════════════════
-app.get('/api/dashboard', async (req, res) => {
+app.get('/api/dashboard', verifyToken, async (req, res) => {
   try {
     const inicio_mes = new Date(); inicio_mes.setDate(1); inicio_mes.setHours(0,0,0,0);
     const hoy_inicio = new Date(); hoy_inicio.setHours(0,0,0,0);
@@ -358,7 +456,7 @@ app.get('/api/dashboard', async (req, res) => {
 // ════════════════════════════════════════════════════════════
 
 // Recalcular y devolver todas las alertas activas
-app.get('/api/alertas', async (req, res) => {
+app.get('/api/alertas', verifyToken, async (req, res) => {
   try {
     const hoy = new Date();
     const en30 = new Date(); en30.setDate(en30.getDate() + 30);
@@ -396,7 +494,7 @@ app.get('/api/alertas', async (req, res) => {
 });
 
 // Obtener próximo service de un vehículo
-app.get('/api/alertas/:dominio', async (req, res) => {
+app.get('/api/alertas/:dominio', verifyToken, async (req, res) => {
   try {
     const ps = await ProximoService.findOne({ dominio: req.params.dominio.toUpperCase() });
     res.json(ps || null);
@@ -406,7 +504,7 @@ app.get('/api/alertas/:dominio', async (req, res) => {
 });
 
 // Actualizar manualmente el próximo service
-app.put('/api/alertas/:dominio', async (req, res) => {
+app.put('/api/alertas/:dominio', verifyToken, async (req, res) => {
   try {
     const dominio = req.params.dominio.toUpperCase();
     const { meses_intervalo, km_intervalo, nota, fecha_proximo, km_proximo } = req.body;
@@ -437,7 +535,7 @@ app.put('/api/alertas/:dominio', async (req, res) => {
 // ════════════════════════════════════════════════════════════
 
 // Obtener turnos de un día específico
-app.get('/api/turnos/dia/:fecha', async (req, res) => {
+app.get('/api/turnos/dia/:fecha', verifyToken, async (req, res) => {
   try {
     const inicio = new Date(req.params.fecha);
     inicio.setHours(0,0,0,0);
@@ -454,7 +552,7 @@ app.get('/api/turnos/dia/:fecha', async (req, res) => {
 });
 
 // Obtener turnos de una semana
-app.get('/api/turnos/semana/:fechaInicio', async (req, res) => {
+app.get('/api/turnos/semana/:fechaInicio', verifyToken, async (req, res) => {
   try {
     const inicio = new Date(req.params.fechaInicio);
     inicio.setHours(0,0,0,0);
@@ -472,7 +570,7 @@ app.get('/api/turnos/semana/:fechaInicio', async (req, res) => {
 });
 
 // Crear turno
-app.post('/api/turnos', async (req, res) => {
+app.post('/api/turnos', verifyToken, async (req, res) => {
   try {
     // Si la patente existe en BD, vincular vehículo y cliente
     let vehiculo_id = null, cliente_id = null;
@@ -494,7 +592,7 @@ app.post('/api/turnos', async (req, res) => {
 });
 
 // Actualizar estado del turno
-app.put('/api/turnos/:id', async (req, res) => {
+app.put('/api/turnos/:id', verifyToken, async (req, res) => {
   try {
     const turno = await Turno.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(turno);
@@ -504,10 +602,92 @@ app.put('/api/turnos/:id', async (req, res) => {
 });
 
 // Eliminar turno
-app.delete('/api/turnos/:id', async (req, res) => {
+app.delete('/api/turnos/:id', verifyToken, async (req, res) => {
   try {
     await Turno.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+//  RUTAS: EDICIÓN DE FICHAS
+// ════════════════════════════════════════════════════════════
+
+// Obtener ficha completa por ID
+app.get('/api/fichas/:id', verifyToken, async (req, res) => {
+  try {
+    const ficha = await Ficha.findById(req.params.id)
+      .populate('vehiculo_id')
+      .populate('cliente_id');
+    const servicios = await Servicio.find({ ficha_id: req.params.id });
+    const estadoItems = await EstadoItem.findOne({ ficha_id: req.params.id });
+    if (!ficha) return res.status(404).json({ error: 'Ficha no encontrada' });
+    res.json({ 
+      ficha, 
+      servicios, 
+      estadoItems: estadoItems?.items || [], 
+      vehiculo: ficha.vehiculo_id, 
+      cliente: ficha.cliente_id 
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Actualizar ficha
+app.put('/api/fichas/:id', verifyToken, async (req, res) => {
+  try {
+    const { ficha_data } = req.body;
+    const ficha = await Ficha.findByIdAndUpdate(req.params.id, {
+      km_inicial: ficha_data.km_inicial,
+      km_final: ficha_data.km_final,
+      vtv: ficha_data.vtv,
+      responsable: ficha_data.responsable,
+      turno: ficha_data.turno,
+      fluidos: { aceite: ficha_data.medida_aceite, frenos: ficha_data.medida_frenos, refrigerante: ficha_data.medida_refrigerante },
+      accesorios: { baliza: ficha_data.accesorios?.includes('Baliza emergencia') || false, extintor: ficha_data.accesorios?.includes('Extintor') || false, rueda_auxilio: ficha_data.accesorios?.includes('Rueda auxilio') || false, crique: ficha_data.accesorios?.includes('Crique') || false, herramientas: ficha_data.accesorios?.includes('Herramientas') || false, botiquin: ficha_data.accesorios?.includes('Botiquín') || false, otros: ficha_data.otros_accesorios },
+      estado_general: ficha_data.estado_general,
+      obs_visuales: ficha_data.obs_visuales,
+      obs_adicionales: ficha_data.obs_adicionales,
+    }, { new: true });
+    res.json(ficha);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Actualizar servicio
+app.put('/api/servicios/:id', verifyToken, async (req, res) => {
+  try {
+    const servicio = await Servicio.findByIdAndUpdate(req.params.id, {
+      tipo: req.body.tipo,
+      descripcion: req.body.descripcion,
+      repuestos: req.body.repuestos || [],
+      completado: req.body.completado || false,
+    }, { new: true });
+    res.json(servicio);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Eliminar servicio
+app.delete('/api/servicios/:id', verifyToken, async (req, res) => {
+  try {
+    await Servicio.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Actualizar estado de ítems
+app.put('/api/estadoitems/:id', verifyToken, async (req, res) => {
+  try {
+    const estadoItem = await EstadoItem.findByIdAndUpdate(req.params.id, { items: req.body.items }, { new: true });
+    res.json(estadoItem);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
