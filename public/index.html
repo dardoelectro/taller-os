@@ -977,6 +977,127 @@ function toggleCheck(el) { el.classList.toggle('checked'); }
 
 // â”€â”€ ConexiÃ³n al servidor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// FICHAS MEJORADAS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+let fichaActual = null;
+let diagnosticoActual = null;
+
+async function abrirDiagnostico(fichaId) {
+  fichaActual = fichaId;
+  document.getElementById('modal-diagnostico').classList.add('open');
+  cargarDiagnosticoExistente();
+}
+
+function cerrarDiagnostico() {
+  document.getElementById('modal-diagnostico').classList.remove('open');
+  document.getElementById('diag-tipo').value = 'OBD-II';
+  document.getElementById('diag-resultado').value = '';
+  document.getElementById('diag-archivo').value = '';
+  fichaActual = null;
+}
+
+async function cargarDiagnosticoExistente() {
+  if (!fichaActual) return;
+  try {
+    const response = await fetch(/api/fichas/\, { headers: getHeaders() });
+    if (!response.ok) return;
+    const data = await response.json();
+    const { ficha } = data;
+    
+    if (ficha.diagnostico) {
+      document.getElementById('diag-tipo').value = ficha.diagnostico.tipo || 'OBD-II';
+      document.getElementById('diag-resultado').value = ficha.diagnostico.resultado_texto || '';
+      
+      if (ficha.diagnostico.archivos_adjuntos && ficha.diagnostico.archivos_adjuntos.length > 0) {
+        mostrarArchivosAdjuntos(ficha.diagnostico.archivos_adjuntos);
+      }
+    }
+  } catch (e) {
+    console.error('Error cargando diagnostico:', e);
+  }
+}
+
+function mostrarArchivosAdjuntos(archivos) {
+  const lista = document.getElementById('diag-archivos-lista');
+  if (!archivos.length) {
+    lista.style.display = 'none';
+    return;
+  }
+  lista.style.display = 'block';
+  lista.innerHTML = '<strong style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 8px;">Archivos Adjuntos:</strong>' + 
+    archivos.map(a => 
+      <div class="archivo-item">
+        <a href="/diagnosticos/escaner/" target="_blank">ðŸ“„ </a>
+        <button class="btn-eliminar" onclick="alert('Eliminar: implementar en backend')">X</button>
+      </div>
+    ).join('');
+}
+
+async function guardarDiagnostico() {
+  if (!fichaActual) {
+    toast('Error: no hay ficha', 'err');
+    return;
+  }
+  
+  const tipo = document.getElementById('diag-tipo').value;
+  const resultado = document.getElementById('diag-resultado').value;
+  
+  if (!resultado) {
+    toast('Resultado requerido', 'err');
+    return;
+  }
+  
+  try {
+    const diagnosticoData = {
+      tipo,
+      resultado_texto: resultado,
+      fecha: new Date().toISOString()
+    };
+    
+    const response = await fetch(/api/fichas/\, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ diagnostico: diagnosticoData })
+    });
+    
+    if (response.ok) {
+      toast('Diagnostico guardado', 'ok');
+      cerrarDiagnostico();
+    } else {
+      toast('Error al guardar', 'err');
+    }
+  } catch (e) {
+    toast('Error: ' + e.message, 'err');
+  }
+}
+
+// Mejorar verHistorial para mostrar servicios
+async function mostrarServiciosFicha(fichaId) {
+  try {
+    const response = await fetch(/api/fichas/\, { headers: getHeaders() });
+    if (!response.ok) return '';
+    const data = await response.json();
+    const { servicios } = data;
+    
+    if (!servicios || servicios.length === 0) {
+      return '<p style="color: var(--muted); font-size: 12px; margin: 0;">Sin servicios registrados</p>';
+    }
+    
+    return servicios.map(s => 
+      <div class="servicio-item">
+        <strong></strong>
+        <p></p>
+      </div>
+    ).join('');
+  } catch (e) {
+    return '<p style="color: var(--bad); font-size: 12px;">Error cargando servicios</p>';
+  }
+}
+
+
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // OPERARIOS
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -1912,3 +2033,4 @@ setTimeout(loadAlertas, 1500);
 </script>
 </body>
 </html>
+
