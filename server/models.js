@@ -248,6 +248,64 @@ UsuarioSchema.pre('save', function(next) {
   next();
 });
 
+// -----------------------------------------------
+// 9. OPERARIOS (Tecnicos/Mecanicos)
+// -----------------------------------------------
+const OperarioSchema = new mongoose.Schema({
+  nombre:          { type: String, required: true, trim: true },
+  email:           { type: String, unique: true, lowercase: true, trim: true },
+  telefono:        { type: String },
+  rol:             { type: String, enum: ['admin', 'jefe_taller', 'tecnico_especialista', 'mecanico_general', 'recepcion'], default: 'tecnico_especialista' },
+  especialidades:  { type: [String], default: [] },
+  certificaciones: [{
+    nombre:        String,
+    vencimiento:   Date
+  }],
+  disponibilidad:  String,
+  activo:          { type: Boolean, default: true },
+  creado_en:       { type: Date, default: Date.now },
+  actualizado:     { type: Date, default: Date.now }
+});
+
+OperarioSchema.pre('save', function(next) {
+  this.actualizado = new Date();
+  next();
+});
+
+// -----------------------------------------------
+// 10. TALLER (Configuracion)
+// -----------------------------------------------
+const TallerSchema = new mongoose.Schema({
+  nombre:          { type: String, default: 'MODUCHIP AutoElectroLab' },
+  email:           String,
+  telefono:        String,
+  ubicacion:       String,
+  logo_url:        { type: String, default: '/uploads/taller/logo.png' },
+  horarios:        {
+    lunes_viernes: String,
+    sabados:       String,
+    domingos:      String
+  },
+  datos_legales:   {
+    razon_social:     String,
+    cuit:             String,
+    domicilio_legal:  String,
+    licencia_municipal: String
+  },
+  configuracion:   {
+    garantia_default:        { type: String, default: '90 dias' },
+    vigencia_presupuesto:    { type: String, default: '7 dias' },
+    moneda:                  { type: String, default: 'ARS' }
+  },
+  creado_en:       { type: Date, default: Date.now },
+  actualizado:     { type: Date, default: Date.now }
+});
+
+TallerSchema.pre('save', function(next) {
+  this.actualizado = new Date();
+  next();
+});
+
 // ─────────────────────────────────────────────
 // EXPORTAR MODELOS
 // ─────────────────────────────────────────────
@@ -260,4 +318,6 @@ module.exports = {
   ProximoService:  mongoose.model('ProximoService',  ProximoServiceSchema),
   Turno:           mongoose.model('Turno',           TurnoSchema),
   Usuario:         mongoose.model('Usuario',         UsuarioSchema),
+  Operario:        mongoose.model('Operario',        OperarioSchema),
+  Taller:          mongoose.model('Taller',          TallerSchema),
 };
